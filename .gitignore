@@ -1,4 +1,5 @@
-datasets/
+datasets/ficker8k_images
+datasets/Flickr8k_Nepali_Dataset.zip
 __pycache__/
 *.pt
 *.ipynb_checkpoints/
