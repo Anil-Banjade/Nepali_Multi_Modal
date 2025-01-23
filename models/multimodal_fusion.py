@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from model import ProjectionHead,ContrastiveModel
+from .model import ProjectionHead,ContrastiveModel
 from config import Configuration
 from tqdm.autonotebook import tqdm
 from dataset import build_loaders
@@ -48,47 +48,90 @@ class MultiModalFusion(nn.Module):
         return self.final_fusion(fused)
 
 
-def generate_fused_embeddings(model_path='best.pt'):
-    train_df, _ = make_train_valid_dfs()
-    tokenizer = AutoTokenizer.from_pretrained(Configuration.text_tokenizer)
-    data_loader = build_loaders(train_df, tokenizer, mode="train")
+# def generate_fused_embeddings(model_path='best.pt'):
+#     train_df, _ = make_train_valid_dfs()
+#     tokenizer = AutoTokenizer.from_pretrained(Configuration.text_tokenizer)
+#     data_loader = build_loaders(train_df, tokenizer, mode="train")
     
-    contrastive_model = ContrastiveModel().to(Configuration.device)
-    contrastive_model.load_state_dict(torch.load(model_path))
-    contrastive_model.eval()
+#     contrastive_model = ContrastiveModel().to(Configuration.device)
+#     contrastive_model.load_state_dict(torch.load(model_path))
+#     contrastive_model.eval()
 
-    fusion_model = MultiModalFusion().to(Configuration.device)
-    fusion_model.eval()
+#     fusion_model = MultiModalFusion().to(Configuration.device)
+#     fusion_model.eval()
     
-    all_fused_embeddings = []
-    progress_bar = tqdm(data_loader, desc='Generating fused embeddings')
+#     all_fused_embeddings = []
+#     progress_bar = tqdm(data_loader, desc='Generating fused embeddings')
     
-    with torch.no_grad():
-        for batch in progress_bar:
-            batch = {k: v.to(Configuration.device) for k, v in batch.items() if k != 'caption'}
-            image_features = contrastive_model.image_encoder(batch['image'])
-            text_features = contrastive_model.text_encoder(
-                input_ids=batch['input_ids'],
-                attention_mask=batch['attention_mask']
-            )
+#     with torch.no_grad():
+#         for batch in progress_bar:
+#             batch = {k: v.to(Configuration.device) for k, v in batch.items() if k != 'caption'}
+#             image_features = contrastive_model.image_encoder(batch['image'])
+#             text_features = contrastive_model.text_encoder(
+#                 input_ids=batch['input_ids'],
+#                 attention_mask=batch['attention_mask']
+#             )
             
-            fused = fusion_model(image_features, text_features)
+#             fused = fusion_model(image_features, text_features)
             
-            all_fused_embeddings.append({
-                'fused_embedding': fused.cpu(),
-                'caption': batch.get('caption', None)
-            })
+#             all_fused_embeddings.append({
+#                 'fused_embedding': fused.cpu(),
+#                 'caption': batch.get('caption', None)
+#             })
             
-    return all_fused_embeddings
+#     return all_fused_embeddings
 
 
 def train_combined():
+    train_df, valid_df = make_train_valid_dfs()
+    tokenizer = AutoTokenizer.from_pretrained(Configuration.text_tokenizer)
+    train_loader = build_loaders(train_df, tokenizer, mode="train")
+    valid_loader = build_loaders(valid_df, tokenizer, mode="valid")
+    
+    contrastive_model = ContrastiveModel().to(Configuration.device)
+    contrastive_model.load_state_dict(torch.load('best.pt'))
+    contrastive_model.eval() 
+    
+    fusion_model = MultiModalFusion().to(Configuration.device)
+    optimizer = torch.optim.AdamW(fusion_model.parameters(), lr=1e-4)
+    criterion = nn.MSELoss()  
+    
+    best_loss = float('inf')
+    
+    for epoch in range(Configuration.num_epochs):
+        fusion_model.train()
+        train_loss = 0
+        
+        for batch in tqdm(train_loader, desc=f'Epoch {epoch + 1}'):
+            batch = {k: v.to(Configuration.device) for k, v in batch.items() if k != 'caption'}
+            
+            
+            with torch.no_grad():
+                image_features = contrastive_model.image_encoder(batch['image'])
+                text_features = contrastive_model.text_encoder(
+                    input_ids=batch['input_ids'],
+                    attention_mask=batch['attention_mask']
+                )
+            
+            fused = fusion_model(image_features, text_features)
+            
+            loss = criterion(fused, (image_features + text_features) / 2)
+            
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            
+            train_loss += loss.item()
+        
+        avg_train_loss = train_loss / len(train_loader)
+        print(f'Epoch {epoch + 1}, Training Loss: {avg_train_loss:.4f}')
+        
+        # Save best model
+        if avg_train_loss < best_loss:
+            best_loss = avg_train_loss
+            torch.save(fusion_model.state_dict(), 'best_fusion.pt')
 
-    print('Generating fused embeddings\n') 
-    fused_embeddings=generate_fused_embeddings()
-
-    print('saving fused embeddings \n')
-    torch.save(fused_embeddings,'fused_embeddings.pt')
+    print('Training completed!')
 
 
  
