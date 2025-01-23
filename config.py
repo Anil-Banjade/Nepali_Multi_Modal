@@ -25,3 +25,5 @@ class Configuration:
     projection_dim=512
     fusion_dim=512
     dropout=0
+    num_epochs=1
+    
