@@ -2,7 +2,7 @@ import torch
 import pandas as pd
 import numpy as np
 import albumentations as A
-from config import Configuration
+from .config import Configuration
 
 def get_lr(optimizer):
     for param_group in optimizer.param_groups:

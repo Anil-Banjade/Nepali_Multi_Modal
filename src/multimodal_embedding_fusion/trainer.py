@@ -2,7 +2,7 @@ import torch
 import itertools
 from tqdm.autonotebook import tqdm
 from utils import get_lr
-from config import Configuration
+from .config import Configuration
 from torch import nn
 
 def train_epoch(model,train_loader,optimizer,lr_scheduler,step):
