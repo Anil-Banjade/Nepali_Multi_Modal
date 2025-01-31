@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import src.multimodal_text_generation.config from config
+from src.multimodal_text_generation.config import config
 
 class PositionalEmbedding(nn.Module):
     def __init__(self):

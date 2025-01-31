@@ -14,11 +14,13 @@ class Transformer(nn.Module):
         self.pos_emb = PositionalEmbedding() 
         self.blocks = nn.Sequential(*[TransformerBlock() for _ in range(6)])
         self.final_ffn = FeedForward()
+        self.gelu=GELU()
         self.output_layer = nn.Linear(config.emb_dim, config.vocab_size)
 
     def forward(self, combined_embeddings):
         x = self.pos_emb(combined_embeddings)
         x = self.blocks(x)
         x = self.final_ffn(x)
+        x=self.gelu(x)
         logits=self.output_layer(x)
         return logits 

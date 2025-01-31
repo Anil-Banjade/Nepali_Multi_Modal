@@ -1,5 +1,9 @@
 import torch
 import torch.nn as nn
+from torch.utils.data import DataLoader
+from src.multimodal_text_generation.config import config
+from tqdm import tqdm
+
 
 def train_model(model,dataloader,num_epochs,device):
   model=model.to(device)
