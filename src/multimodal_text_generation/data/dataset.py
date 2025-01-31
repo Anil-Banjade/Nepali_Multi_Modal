@@ -5,6 +5,8 @@ class CaptionEmbeddingDataset(Dataset):
   def __init__(self,loaded_results):
     self.captions=[item[0] for item in loaded_results]
     self.embeddings=[item[1] for item in loaded_results]
+    for i, (caption, embedding) in enumerate(zip(self.captions, self.embeddings)):
+      print(f"Index {i}: Caption type: {type(caption)}, Embedding type: {type(embedding)}")
   def __len__(self):
     return len(self.captions)
   def __getitem__(self,idx):
@@ -12,6 +14,8 @@ class CaptionEmbeddingDataset(Dataset):
 
 def collate_fn(batch):
   captions,embeddings=zip(*batch)
+  if not all(isinstance(emb, torch.Tensor) for emb in embeddings):
+    raise ValueError("All embeddings must be tensors.")
   max_len=max(emb.shape[0] for emb in embeddings)
   padded_embeddings=[]
   for emb in embeddings:
