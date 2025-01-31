@@ -3,7 +3,8 @@ import torch.nn as nn
 from src.multimodal_text_generation.config import config
 from src.multimodal_text_generation.models.positional_embedding import PositionalEmbedding
 from src.multimodal_text_generation.models.multi_head_attention import MultiHeadAttention
-from src.multimodal_text_generation.models.layers import FeedForward,GELU
+from src.multimodal_text_generation.models.layers import FeedForward
+from src.multimodal_text_generation.layers import GELU
 from src.multimodal_text_generation.models.transformer_block import TransformerBlock
 
 
