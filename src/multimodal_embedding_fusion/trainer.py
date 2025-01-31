@@ -49,9 +49,7 @@ def valid_epoch(model, valid_loader):
         progress_bar.set_postfix(loss=f'{current_loss:.4f}')
     
     return total_loss / num_samples
-    
-    
-    
+        
       
 def train(train_loader,valid_loader,model):
     optimizer=torch.optim.AdamW([
