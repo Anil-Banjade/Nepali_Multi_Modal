@@ -51,7 +51,7 @@ def main():
     model_path = '/content/drive/MyDrive/Minor_project_try/contrastive_model.pt'  
     train_combined(model_path)
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
 
     
