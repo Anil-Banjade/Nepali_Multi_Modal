@@ -1,9 +1,10 @@
 import torch
 import itertools
 from tqdm.autonotebook import tqdm
-from utils import get_lr
-from .config import Configuration
 from torch import nn
+from src.multimodal_embedding_fusion.config import Configuration
+from src.multimodal_embedding_fusion.utils import get_lr
+
 
 def train_epoch(model,train_loader,optimizer,lr_scheduler,step):
     total_loss=0
@@ -76,6 +77,6 @@ def train(train_loader,valid_loader,model):
         
         if valid_loss<best_loss:
             best_loss=valid_loss
-            torch.save(model.state_dict(),'best.pt')
+            torch.save(model.state_dict(),'contrastive_model.pt')
             print(f'Saved best model. Loss: {best_loss:.4f}')
         lr_scheduler.step(valid_loss)

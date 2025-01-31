@@ -2,7 +2,7 @@ import torch
 from torch import nn
 import timm
 from transformers import AutoModel,AutoConfig
-from config import Configuration 
+from src.multimodal_embedding_fusion.config import Configuration
 import torch.nn.functional as F
 
 class TextEncoder(nn.Module):

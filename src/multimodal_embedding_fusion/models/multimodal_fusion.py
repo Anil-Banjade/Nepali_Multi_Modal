@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
-from models.model import ProjectionHead,ContrastiveModel
-from config import Configuration
 from tqdm.autonotebook import tqdm
-from dataset import build_loaders
 from transformers import AutoTokenizer
-from utils import make_train_valid_dfs
+from src.multimodal_embedding_fusion.config import Configuration
+from src.multimodal_embedding_fusion.models.model import ProjectionHead,ContrastiveModel
+from src.multimodal_embedding_fusion.data.dataset import build_loaders
+from src.multimodal_embedding_fusion.utils import make_train_valid_dfs
 
 
 class MultiModalFusion(nn.Module):
@@ -110,7 +110,7 @@ def train_combined(model_path):
         
         if avg_train_loss < best_loss:
             best_loss = avg_train_loss
-            torch.save(fusion_model.state_dict(), 'best_fusion.pt')
+            torch.save(fusion_model.state_dict(), 'fused_embeddings.pt')
 
     print('Training completed!')
 

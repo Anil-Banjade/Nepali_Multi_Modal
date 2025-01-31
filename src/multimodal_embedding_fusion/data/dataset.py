@@ -1,9 +1,9 @@
 import cv2
 import torch
-from config import Configuration
-from utils import get_transforms
-from models.tokenizer import Tokenizer
 import torch.nn as nn
+from src.multimodal_embedding_fusion.config import Configuration
+from src.multimodal_embedding_fusion.utils import get_transforms
+
 
 class ImageTextDataset(torch.utils.data.Dataset):
     def __init__(self,image_filenames,captions,tokenizer,transforms):
