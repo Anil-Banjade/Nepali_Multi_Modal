@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from models.model import ProjectionHead,ContrastiveModel
-from config import Configuration
+from .config import Configuration
 from tqdm.autonotebook import tqdm
 from dataset import build_loaders
 from transformers import AutoTokenizer
