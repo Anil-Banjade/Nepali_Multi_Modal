@@ -42,17 +42,13 @@ def init_model_and_loaders():
 
 
 def main():
-    # Setup data
     df = setup_data()
     
-    # Initialize model and loaders
     model, train_loader, valid_loader = init_model_and_loaders()
     
-    # Training options
     train(train_loader, valid_loader, model)
     
-    # Option 2: Combined training
-    model_path = '/content/drive/MyDrive/Minor_project_try/best.pt'  
+    model_path = '/content/drive/MyDrive/Minor_project_try/contrastive_model.pt'  
     train_combined(model_path)
 
 if __name__ == "__main__":

@@ -49,7 +49,7 @@ class MultiModalFusion(nn.Module):
 
 
 
-def train_combined(model_path):
+def train_combined(model_path): 
     train_df, valid_df = make_train_valid_dfs()
     tokenizer = AutoTokenizer.from_pretrained(Configuration.text_tokenizer)
     train_loader = build_loaders(train_df, tokenizer, mode="train")
