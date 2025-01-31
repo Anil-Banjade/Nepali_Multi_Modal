@@ -17,7 +17,7 @@ class Configuration:
     image_encoder_lr=1e-5
     patience=1
     factor=0.8
-    epochs=1
+    epochs=5
     temperature=1.0
     weight_decay = 1e-3
     size=224
