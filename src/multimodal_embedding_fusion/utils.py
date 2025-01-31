@@ -13,7 +13,7 @@ def get_transforms(mode='train'):
         [
             A.Resize(Configuration.size,Configuration.size,always_apply=True),
             A.Normalize(max_pixel_value=255.0,always_apply=True),
-        ]
+        ] 
     )
     
 def make_train_valid_dfs():

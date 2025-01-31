@@ -2,7 +2,8 @@ import cv2
 import torch
 from config import Configuration
 from utils import get_transforms
-
+from models.tokenizer import Tokenizer
+import torch.nn as nn
 
 class ImageTextDataset(torch.utils.data.Dataset):
     def __init__(self,image_filenames,captions,tokenizer,transforms):
@@ -45,4 +46,5 @@ def build_loaders(dataframe,tokenizer,mode):
         shuffle=True if mode=='train' else False,
     )
     return dataloader
+
 

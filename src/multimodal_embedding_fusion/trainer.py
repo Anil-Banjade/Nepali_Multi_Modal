@@ -8,7 +8,7 @@ from torch import nn
 def train_epoch(model,train_loader,optimizer,lr_scheduler,step):
     total_loss=0
     num_samples=0
-    model.train()
+    model.train() 
     progress_bar=tqdm(train_loader,total=len(train_loader))
     for batch in progress_bar:
         batch={k:v.to(Configuration.device) for k,v in batch.items() if k!='caption'}

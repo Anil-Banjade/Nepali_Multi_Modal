@@ -48,39 +48,6 @@ class MultiModalFusion(nn.Module):
         return self.final_fusion(fused)
 
 
-# def generate_fused_embeddings(model_path='best.pt'):
-#     train_df, _ = make_train_valid_dfs()
-#     tokenizer = AutoTokenizer.from_pretrained(Configuration.text_tokenizer)
-#     data_loader = build_loaders(train_df, tokenizer, mode="train")
-    
-#     contrastive_model = ContrastiveModel().to(Configuration.device)
-#     contrastive_model.load_state_dict(torch.load(model_path))
-#     contrastive_model.eval()
-
-#     fusion_model = MultiModalFusion().to(Configuration.device)
-#     fusion_model.eval()
-    
-#     all_fused_embeddings = []
-#     progress_bar = tqdm(data_loader, desc='Generating fused embeddings')
-    
-#     with torch.no_grad():
-#         for batch in progress_bar:
-#             batch = {k: v.to(Configuration.device) for k, v in batch.items() if k != 'caption'}
-#             image_features = contrastive_model.image_encoder(batch['image'])
-#             text_features = contrastive_model.text_encoder(
-#                 input_ids=batch['input_ids'],
-#                 attention_mask=batch['attention_mask']
-#             )
-            
-#             fused = fusion_model(image_features, text_features)
-            
-#             all_fused_embeddings.append({
-#                 'fused_embedding': fused.cpu(),
-#                 'caption': batch.get('caption', None)
-#             })
-            
-#     return all_fused_embeddings
-
 
 def train_combined(model_path):
     train_df, valid_df = make_train_valid_dfs()
@@ -113,11 +80,9 @@ def train_combined(model_path):
                     attention_mask=batch['attention_mask']
                 )
             
-            # Project both features to the same dimension before fusion
             image_projected = fusion_model.image_projection(image_features)
             text_projected = fusion_model.text_projection(text_features)
             
-            # Ensure proper dimensions for fusion
             if len(image_projected.shape) == 2:
                 image_projected = image_projected.unsqueeze(0)
             if len(text_projected.shape) == 2:
@@ -131,7 +96,6 @@ def train_combined(model_path):
             
             fused = fusion_model.final_fusion(fused)
             
-            # Compute loss using projected features
             target = (image_projected + text_projected) / 2
             loss = criterion(fused, target)
             
@@ -151,5 +115,4 @@ def train_combined(model_path):
     print('Training completed!')
 
 
- 
  

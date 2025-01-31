@@ -27,3 +27,5 @@ class Configuration:
     dropout=0
     num_epochs=1
     
+    
+    
