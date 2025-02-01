@@ -21,7 +21,7 @@ def train_model(model,dataloader,num_epochs,device):
       tokens=model.tokenizer(captions,return_tensors='pt',padding=True,max_length=128,truncation=True)
       target_tokens=tokens['input_ids'].to(device)
 
-      outputs=model(embeddings)
+      outputs=model(embeddings) 
 
       outputs=outputs[:,1:-1,:]
       targets=target_tokens[:,1:]

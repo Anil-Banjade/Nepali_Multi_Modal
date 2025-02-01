@@ -45,7 +45,7 @@ class ProjectionHead(nn.Module):
     ):
         super().__init__()
         self.projection=nn.Linear(embedding_dim,projection_dim)
-        self.gelu=nn.GELU()
+        self.gelu=nn.GELU() 
         self.fc=nn.Linear(projection_dim,projection_dim)
         self.dropout=nn.Dropout(dropout)
         self.layer_norm=nn.LayerNorm(projection_dim)

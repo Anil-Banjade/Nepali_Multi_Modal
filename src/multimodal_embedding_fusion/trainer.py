@@ -5,7 +5,6 @@ from torch import nn
 from src.multimodal_embedding_fusion.config import Configuration
 from src.multimodal_embedding_fusion.utils import get_lr
 
-
 def train_epoch(model,train_loader,optimizer,lr_scheduler,step):
     total_loss=0
     num_samples=0

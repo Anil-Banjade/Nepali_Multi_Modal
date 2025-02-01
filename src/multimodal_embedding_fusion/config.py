@@ -22,8 +22,8 @@ class Configuration:
     weight_decay = 1e-3
     size=224
     num_projection_layers=1
-    projection_dim=512
-    fusion_dim=512
+    projection_dim=512 
+    fusion_dim=512  
     dropout=0
     num_epochs=5
 

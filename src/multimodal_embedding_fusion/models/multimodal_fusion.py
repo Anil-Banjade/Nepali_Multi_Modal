@@ -8,7 +8,7 @@ from src.multimodal_embedding_fusion.data.dataset import build_loaders
 from src.multimodal_embedding_fusion.utils import make_train_valid_dfs
 
 
-class MultiModalFusion(nn.Module):
+class MultiModalFusion(nn.Module): 
     def __init__(
         self,
         image_embedding=Configuration.image_embedding,
@@ -18,7 +18,7 @@ class MultiModalFusion(nn.Module):
         super().__init__()
         self.image_projection=ProjectionHead(embedding_dim=image_embedding)
         self.text_projection=ProjectionHead(embedding_dim=text_embedding)
-        self.fusion_dim=fusion_dim 
+        self.fusion_dim=fusion_dim  
         
         self.cross_attention=nn.MultiheadAttention(
             embed_dim=fusion_dim,
@@ -48,7 +48,6 @@ class MultiModalFusion(nn.Module):
         return self.final_fusion(fused)
 
 
-
 def train_combined(model_path): 
     train_df, valid_df = make_train_valid_dfs()
     tokenizer = AutoTokenizer.from_pretrained(Configuration.text_tokenizer)
@@ -56,7 +55,6 @@ def train_combined(model_path):
     valid_loader = build_loaders(valid_df, tokenizer, mode="valid")
     
     contrastive_model = ContrastiveModel().to(Configuration.device)
-    # contrastive_model.load_state_dict(torch.load('best.pt'))
     contrastive_model.load_state_dict(torch.load(model_path))
     contrastive_model.eval() 
     
@@ -111,8 +109,33 @@ def train_combined(model_path):
         if avg_train_loss < best_loss:
             best_loss = avg_train_loss
             torch.save(fusion_model.state_dict(), 'fused_embeddings.pt')
+            
+        
+        fusion_model.eval()
+        valid_loss = 0
+        
+        with torch.no_grad():
+            for batch in tqdm(valid_loader, desc=f'Epoch {epoch + 1} - Validation'):
+                batch = {k: v.to(Configuration.device) for k, v in batch.items() if k != 'caption'}
+                
+                image_features = contrastive_model.image_encoder(batch['image'])
+                text_features = contrastive_model.text_encoder(
+                    input_ids=batch['input_ids'],
+                    attention_mask=batch['attention_mask']
+                )
+                
+                fused = fusion_model(image_features, text_features)
+                target = (fusion_model.image_projection(image_features) + fusion_model.text_projection(text_features)) / 2
+                loss = criterion(fused, target)
+                valid_loss += loss.item()
+        
+        avg_valid_loss = valid_loss / len(valid_loader)
+        print(f'Epoch {epoch + 1}, Validation Loss: {avg_valid_loss:.4f}')
+        
+        if avg_valid_loss < best_loss:
+            best_loss = avg_valid_loss
+            torch.save(fusion_model.state_dict(), 'fused_embeddings.pt')
+            print(f'Saved best model with Validation Loss: {best_loss:.4f}')
 
-    print('Training completed!')
+    print('Training completed!') 
 
-
- 
