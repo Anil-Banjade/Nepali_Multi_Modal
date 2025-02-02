@@ -4,7 +4,7 @@ from torch.utils.data import dataset,DataLoader
 
 from src.multimodal_text_generation.config import config
 from src.multimodal_text_generation.models.transformer import Transformer
-from src.multimodal_text_generation.data.dataset import CaptionEmbeddingDataset, collate_fn
+from src.multimodal_text_generation.data.dataset import CaptionEmbeddingDataset
 # from src.multimodal_text_generation.utils.inference import run_inference 
 from src.multimodal_text_generation.trainer import train_model 
 
@@ -17,8 +17,8 @@ def main():
     
     loaded_results = torch.load('/content/drive/MyDrive/Minorproj_Nepali_MultiModal/prefix_and_word.pt',weights_only=True)
     
-    dataset = CaptionEmbeddingDataset(loaded_results)
-    dataloader = DataLoader(dataset, batch_size=4, shuffle=True, collate_fn=collate_fn)
+    dataset = CaptionEmbeddingDataset(loaded_results,tokenizer) 
+    dataloader = DataLoader(dataset, batch_size=4, shuffle=True, collate_fn=dataset.collate_fn)
     
     model = Transformer(tokenizer)
     
