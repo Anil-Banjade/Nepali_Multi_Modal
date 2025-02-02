@@ -50,7 +50,7 @@ class CaptionEmbeddingDataset(Dataset):
         fused_padded = torch.stack([
             torch.cat([
                 fe[:max_len],  # Truncate if needed
-                torch.zeros(max(0, max_len - fe.size(0)), self.emb_dim)
+                torch.zeros(max(0, max_len - fe.size(0)), config.emb_dim)
             ]) for fe in fused_embs
         ])
         
