@@ -23,7 +23,7 @@ class CaptionEmbeddingDataset(Dataset):
         tokenized = self.tokenizer(
             captions,
             padding='max_length',  
-            max_length=min(self.tokenizer.model_max_length,512)
+            max_length=min(self.tokenizer.model_max_length,512),
             return_tensors='pt',
             truncation=True,
             add_special_tokens=False
