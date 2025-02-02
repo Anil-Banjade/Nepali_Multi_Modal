@@ -1,5 +1,6 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
+from src.multimodal_text_generation.config import config
 
 class CaptionEmbeddingDataset(Dataset):
   def __init__(self,loaded_results,tokenizer):
@@ -10,11 +11,13 @@ class CaptionEmbeddingDataset(Dataset):
     #   print(f"Index {i}: Caption type: {type(caption)}, Embedding type: {type(embedding)}")
   def __len__(self):
     return len(self.captions)
+  
   def __getitem__(self,idx):  
     return {
       'fused_embedding':self.fused_embeddings[idx],
       'caption':self.captions[idx]
     }
+    
   def collate_fn(self, batch):
     fused_embs = [item['fused_embedding'] for item in batch]
     captions = [item['caption'] for item in batch]
