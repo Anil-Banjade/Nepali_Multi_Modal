@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from src.multimodal_text_generation.config import config
 
-from src.multimodal_text_generation.get_embedding import NepBERTaEmbeddings
+from src.multimodal_text_generation.models.get_embedding import NepBERTaEmbeddings
 
 from src.multimodal_text_generation.models.positional_embedding import PositionalEmbedding
 from src.multimodal_text_generation.models.multi_head_attention import MultiHeadAttention
