@@ -14,4 +14,3 @@ class config:
     vocab_size = 30522
     dropout = 0.1
     
-  

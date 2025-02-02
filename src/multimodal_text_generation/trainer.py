@@ -16,12 +16,14 @@ def train_model(model,dataloader,num_epochs,device):
 
     for batch_idx,batch in enumerate(dataloader):
       fused_embs = batch['fused_embeddings'].to(device)
-      targets = batch['input_ids'].to(device)
+      shifted_input_ids=batch['shifted_input_ids'].to(device)
+      targets = batch['targets'].to(device)
       
-      outputs=model(fused_embs)
+      logits=model(fused_embs,shifted_input_ids)
+      
 
-      loss=criterion(outputs[:, :-1, :].contiguous().view(-1, config.vocab_size),
-                            targets[:, 1:].contiguous().view(-1))
+      loss = criterion(logits.view(-1, config.vocab_size), targets.view(-1))
+      
       optimizer.zero_grad()
       loss.backward()
       optimizer.step()
