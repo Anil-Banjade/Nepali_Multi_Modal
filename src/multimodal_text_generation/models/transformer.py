@@ -13,11 +13,10 @@ from src.multimodal_text_generation.models.transformer_block import TransformerB
 
 class Transformer(nn.Module):
     def __init__(self,tokenizer): 
-
+        super().__init__()
         self.bert_emb = NepBERTaEmbeddings() 
         self.fused_proj = nn.Linear(512, config.emb_dim)
-
-        super().__init__()
+        
         self.tokenizer=tokenizer
         self.pos_emb = PositionalEmbedding() 
         self.blocks = nn.Sequential(*[TransformerBlock() for _ in range(6)])
