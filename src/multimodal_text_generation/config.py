@@ -6,7 +6,7 @@ class config:
     d_in=768
     d_out=768
     qkv_bias=False 
-    context_length=128 
+    context_length=512 
     temperature=1.0
     emb_dim = 768
     num_heads = 8

@@ -12,7 +12,7 @@ def main():
     # config = config()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
-    tokenizer = AutoTokenizer.from_pretrained('NepBERTa/NepBERTa')
+    tokenizer = AutoTokenizer.from_pretrained('NepBERTa/NepBERTa',model_max_length=512)
     text_model = AutoModel.from_pretrained("NepBERTa/NepBERTa", from_tf=True)
     
     loaded_results = torch.load('/content/drive/MyDrive/Minorproj_Nepali_MultiModal/prefix_and_word.pt',weights_only=True)
