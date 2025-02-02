@@ -24,4 +24,4 @@ class Transformer(nn.Module):
         x = self.final_ffn(x)
         x=self.gelu(x)
         logits=self.output_layer(x)
-        return logits 
+        return logits         
