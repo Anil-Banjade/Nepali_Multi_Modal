@@ -9,7 +9,7 @@ from src.multimodal_text_generation.data.dataset import CaptionEmbeddingDataset
 from src.multimodal_text_generation.trainer import train_model 
 
 def main():
-    config = config()
+    # config = config()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     tokenizer = AutoTokenizer.from_pretrained('NepBERTa/NepBERTa')

@@ -8,8 +8,8 @@ class CaptionEmbeddingDataset(Dataset):
     self.fused_embeddings=[item[1] for item in loaded_results]
     # for i, (caption, embedding) in enumerate(zip(self.captions, self.embeddings)):
     #   print(f"Index {i}: Caption type: {type(caption)}, Embedding type: {type(embedding)}")
-  # def __len__(self):
-  #   return len(self.captions)
+  def __len__(self):
+    return len(self.captions)
   # def __getitem__(self,idx):  
   #   return {
   #     'fused_embedding':self.fused_embeddings[idx],
