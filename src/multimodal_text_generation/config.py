@@ -13,4 +13,5 @@ class config:
     num_layers = 6
     vocab_size = 30522
     dropout = 0.1
+    max_seq_len=128
     

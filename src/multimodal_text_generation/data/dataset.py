@@ -16,26 +16,27 @@ class CaptionEmbeddingDataset(Dataset):
       'caption':self.captions[idx]
     }
 
-  def collate_fn(self, batch):
-        fused_embs = [item['fused_embedding'] for item in batch]
+  def collate_fn(self, batch): 
         captions = [item['caption'] for item in batch]
         
         tokenized = self.tokenizer(
             captions,
             padding='max_length',  
-            max_length=min(self.tokenizer.model_max_length,512),
+            max_length=config.max_seq_len,
             return_tensors='pt',
             truncation=True,
-            add_special_tokens=False
+            add_special_tokens=True
         )
-        input_ids=tokenized['input_ids']
-        shifted_ids=input_ids[:,:-1]
-        targets=input_ids
-        fused_embs_tensor=torch.stack(fused_embs)
+        
+        fused_embs = torch.stack([item['fused_embedding'] for item in batch])
+        input_ids = tokenized['input_ids']
+        shifted_ids = input_ids[:, :-1] 
+        targets = input_ids[:, 1:] 
+        
         
         return { 
-            'fused_embeddings': fused_embs_tensor,
-            'shifted_input_ids':shifted_input_ids,
+            'fused_embeddings': fused_embs,
+            'shifted_input_ids':shifted_ids,
             'targets':targets
         }
         

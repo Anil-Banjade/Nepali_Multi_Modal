@@ -29,7 +29,7 @@ class Transformer(nn.Module):
         fused_projected=self.fused_proj(fused_embeddings) 
         combined=torch.cat([
             fused_projected.unsqueeze(1), 
-            token_embeds[:,:-1,:]
+            token_embeds
         ],dim=1)
 
         x = self.pos_emb(combined)
