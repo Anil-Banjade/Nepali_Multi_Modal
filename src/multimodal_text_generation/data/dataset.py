@@ -10,11 +10,11 @@ class CaptionEmbeddingDataset(Dataset):
     #   print(f"Index {i}: Caption type: {type(caption)}, Embedding type: {type(embedding)}")
   def __len__(self):
     return len(self.captions)
-  # def __getitem__(self,idx):  
-  #   return {
-  #     'fused_embedding':self.fused_embeddings[idx],
-  #     'caption':self.captions[idx]
-  #   }
+  def __getitem__(self,idx):  
+    return {
+      'fused_embedding':self.fused_embeddings[idx],
+      'caption':self.captions[idx]
+    }
   def collate_fn(self, batch):
     fused_embs = [item['fused_embedding'] for item in batch]
     captions = [item['caption'] for item in batch]
