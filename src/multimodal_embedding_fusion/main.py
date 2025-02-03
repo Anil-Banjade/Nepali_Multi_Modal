@@ -3,7 +3,6 @@ import re
 import torch
 import pandas as pd
 from transformers import AutoTokenizer
-
 from src.multimodal_embedding_fusion.config import Configuration
 from src.multimodal_embedding_fusion.utils import make_train_valid_dfs
 from src.multimodal_embedding_fusion.data.dataset import build_loaders

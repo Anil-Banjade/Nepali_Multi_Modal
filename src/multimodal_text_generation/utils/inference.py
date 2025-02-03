@@ -88,6 +88,21 @@ def generate_caption(model, tokenizer, fused_embedding, device, max_length=50):
             print(traceback.format_exc())
             return None
 
+def load_model(load_path, device):
+    checkpoint = torch.load(load_path, map_location='cpu')
+    tokenizer = AutoTokenizer.from_pretrained('NepBERTa/NepBERTa')
+    model = Transformer(tokenizer)
+    filtered_state_dict = {
+        k: v for k, v in checkpoint['model_state_dict'].items()
+        if k in model.state_dict()
+    }
+    model.load_state_dict(filtered_state_dict, strict=False)
+    model = model.to(device)
+    model.eval()
+
+    return model, tokenizer
+
+
 def run_inference(model_path, test_image_embedding, device, max_attempts=3):
     try:
         print("Loading model...")
