@@ -1,12 +1,12 @@
 import torch
 import torch.nn as nn
 
-def generate_caption(model, tokenizer, image_embedding, device, max_length=50):
+def generate_caption(model, tokenizer, fused_embedding, device, max_length=50):
     model.eval()
     with torch.no_grad(): 
         try:
-            image_embedding = image_embedding.view(1, 1, -1).to(device)
-            print(f"Image embedding shape: {image_embedding.shape}")
+            fused_embedding = fused_embedding.view(1, 1, -1).to(device)
+            print(f"Image embedding shape: {fused_embedding.shape}")
             
             tokens = tokenizer("[CLS]", return_tensors="pt", padding=True, max_length=128, truncation=True)
             with torch.no_grad():
@@ -16,7 +16,7 @@ def generate_caption(model, tokenizer, image_embedding, device, max_length=50):
             
             print(f"BOS embedding shape: {bos_embedding.shape}")
             
-            current_embeddings = torch.cat([bos_embedding, image_embedding], dim=1)
+            current_embeddings = torch.cat([bos_embedding, fused_embedding], dim=1)
             print(f"Current embeddings shape: {current_embeddings.shape}")
            
             generated_tokens = [tokenizer.cls_token_id]
@@ -88,7 +88,24 @@ def generate_caption(model, tokenizer, image_embedding, device, max_length=50):
             print(traceback.format_exc())
             return None
 
-def run_inference(model_path, test_image_embedding, device, max_attempts=3):
+def load_model(load_path, device):
+    checkpoint = torch.load(load_path, map_location='cpu')
+
+    tokenizer = AutoTokenizer.from_pretrained('NepBERTa/NepBERTa')
+    model = Transformer(tokenizer)
+
+    filtered_state_dict = {
+        k: v for k, v in checkpoint['model_state_dict'].items()
+        if k in model.state_dict()
+    }
+    model.load_state_dict(filtered_state_dict, strict=False)
+    model = model.to(device)
+    model.eval()
+
+    return model, tokenizer
+
+
+def run_inference(model_path, test_fused_embedding, device, max_attempts=3):
     try:
         print("Loading model...")
         model, tokenizer = load_model(model_path, device)
@@ -98,7 +115,7 @@ def run_inference(model_path, test_image_embedding, device, max_attempts=3):
             generated_caption = generate_caption(
                 model,
                 tokenizer,
-                test_image_embedding,
+                test_fused_embedding,
                 device
             )
 
@@ -118,14 +135,14 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 
 try:
-    model_path = '/content/drive/MyDrive/Minor_project_try/nepali_transformer_model.pt'
+    model_path = '/content/drive/MyDrive/Minor_project/autoregressive_model.pt'
 
     test_caption, test_embedding = dataset[5]
-    image_embedding = test_embedding[5].clone().detach()
+    fused_embedding = test_embedding[5].clone().detach()
 
     print("\nOriginal caption:", test_caption)
     print("\nStarting inference...")
-    generated_caption = run_inference(model_path, image_embedding, device)
+    generated_caption = run_inference(model_path, fused_embedding, device)
  
     if generated_caption:
         print("\nResults:")
