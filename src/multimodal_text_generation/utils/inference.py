@@ -11,12 +11,12 @@ def generate_caption(model, tokenizer, fused_embedding, device, max_length=50):
             tokens = tokenizer("[CLS]", return_tensors="pt", padding=True, max_length=128, truncation=True)
             with torch.no_grad():
                 bos_output = text_model(**tokens)
-                bos_embedding = bos_output.last_hidden_state[:, 0].unsqueeze(1)  # Shape: [1, 1, 768]
+                bos_embedding = bos_output.last_hidden_state[:, 0].unsqueeze(1)  
                 bos_embedding = bos_embedding.to(device)
             
             print(f"BOS embedding shape: {bos_embedding.shape}")
             
-            current_embeddings = torch.cat([bos_embedding, fused_embedding], dim=1)
+            current_embeddings = torch.cat([fused_embedding, bos_embedding], dim=1)
             print(f"Current embeddings shape: {current_embeddings.shape}")
            
             generated_tokens = [tokenizer.cls_token_id]
@@ -88,24 +88,7 @@ def generate_caption(model, tokenizer, fused_embedding, device, max_length=50):
             print(traceback.format_exc())
             return None
 
-def load_model(load_path, device):
-    checkpoint = torch.load(load_path, map_location='cpu')
-
-    tokenizer = AutoTokenizer.from_pretrained('NepBERTa/NepBERTa')
-    model = Transformer(tokenizer)
-
-    filtered_state_dict = {
-        k: v for k, v in checkpoint['model_state_dict'].items()
-        if k in model.state_dict()
-    }
-    model.load_state_dict(filtered_state_dict, strict=False)
-    model = model.to(device)
-    model.eval()
-
-    return model, tokenizer
-
-
-def run_inference(model_path, test_fused_embedding, device, max_attempts=3):
+def run_inference(model_path, test_image_embedding, device, max_attempts=3):
     try:
         print("Loading model...")
         model, tokenizer = load_model(model_path, device)
@@ -115,7 +98,7 @@ def run_inference(model_path, test_fused_embedding, device, max_attempts=3):
             generated_caption = generate_caption(
                 model,
                 tokenizer,
-                test_fused_embedding,
+                test_image_embedding,
                 device
             )
 
@@ -134,24 +117,3 @@ def run_inference(model_path, test_fused_embedding, device, max_attempts=3):
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 
-try:
-    model_path = '/content/drive/MyDrive/Minor_project/autoregressive_model.pt'
-
-    test_caption, test_embedding = dataset[5]
-    fused_embedding = test_embedding[5].clone().detach()
-
-    print("\nOriginal caption:", test_caption)
-    print("\nStarting inference...")
-    generated_caption = run_inference(model_path, fused_embedding, device)
- 
-    if generated_caption:
-        print("\nResults:")
-        print("Original:", test_caption)
-        print("Generated:", generated_caption)
-    else:
-        print("Failed to generate caption")
-
-except Exception as e:
-    print(f"Main error: {str(e)}")
-    import traceback
-    print(traceback.format_exc())

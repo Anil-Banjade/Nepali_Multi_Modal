@@ -36,7 +36,7 @@ def test():
     test_caption, test_embedding = dataset[5]
     fused_embedding = test_embedding[5].clone().detach()
     
-    model_path = '/content/drive/MyDrive/Minor_project/nepali_transformer_model.pt'
+    model_path = '/content/drive/MyDrive/Minor_project/autoregressive_model.pt'
     generated_caption = run_inference(model_path, fused_embedding, device)
     
     print("Original:", test_caption)
