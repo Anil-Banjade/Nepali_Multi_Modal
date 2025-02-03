@@ -13,7 +13,7 @@ from src.multimodal_embedding_fusion.trainer import train
 def setup_data():
     """Setup and preprocess the dataset"""
     df = pd.read_csv(
-        "translated_nepali_captions.txt",
+        "/content/drive/MyDrive/Minor_project_try/translated_nepali_captions.txt",
         delimiter='#',
         names=['image', 'caption'],
         engine='python',

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from transformers import AutoTokenizer, AutoModel
-
+from src.multimodal_text_generation.models.transformer import Transformer
 def generate_caption(model, tokenizer, fused_embedding, device, max_length=50):
     model.eval()
     with torch.no_grad(): 
