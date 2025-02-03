@@ -11,6 +11,7 @@ def generate_caption(model, tokenizer, fused_embedding, device, max_length=50):
             
             tokens = tokenizer("[CLS]", return_tensors="pt", padding=True, max_length=128, truncation=True)
             with torch.no_grad():
+                text_model = AutoModel.from_pretrained("NepBERTa/NepBERTa", from_tf=True).to(device)
                 bos_output = text_model(**tokens)
                 bos_embedding = bos_output.last_hidden_state[:, 0].unsqueeze(1)  
                 bos_embedding = bos_embedding.to(device)
