@@ -3,5 +3,4 @@ datasets/Flickr8k_Nepali_Dataset.zip
 __pycache__/
 *.pt
 *.ipynb_checkpoints/
-src/multimodal_text_generation/utils
 .gitignore

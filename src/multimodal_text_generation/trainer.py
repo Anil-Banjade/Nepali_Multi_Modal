@@ -16,7 +16,7 @@ def train_model(model,dataloader,num_epochs,device):
 
     for batch_idx,batch in enumerate(dataloader):
       captions, embeddings = batch
-      embeddings=embeddings.to(device)
+      embeddings=embeddings.to(device) 
 
       tokens=model.tokenizer(captions,return_tensors='pt',padding=True,max_length=128,truncation=True)
       target_tokens=tokens['input_ids'].to(device)
@@ -24,7 +24,7 @@ def train_model(model,dataloader,num_epochs,device):
       outputs=model(embeddings) 
  
       outputs=outputs[:,1:-1,:]
-      targets=target_tokens[:,1:]
+      targets=target_tokens[:,1:] 
 
 
       outputs = outputs.contiguous().view(-1, config.vocab_size)
@@ -37,7 +37,7 @@ def train_model(model,dataloader,num_epochs,device):
 
       total_loss+=loss.item()
 
-      if batch_idx%100==0:
+      if batch_idx%1000==0:
         print(f'Epoch [{epoch}/{num_epochs}], Batch [{batch_idx}/{len(dataloader)}], Loss: {loss.item():.4f}')
 
     avg_loss=total_loss/len(dataloader)
