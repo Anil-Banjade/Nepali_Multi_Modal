@@ -4,21 +4,21 @@ from torch.utils.data import dataset,DataLoader
 
 from src.multimodal_text_generation.config import config
 from src.multimodal_text_generation.models.transformer import Transformer
-from src.multimodal_text_generation.data.dataset import CaptionEmbeddingDataset
+from src.multimodal_text_generation.data.dataset import CaptionEmbeddingDataset, collate_fn
 # from src.multimodal_text_generation.utils.inference import run_inference 
 from src.multimodal_text_generation.trainer import train_model 
 
 def main():
-    # config = config()
+    config = config()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
-    tokenizer = AutoTokenizer.from_pretrained('NepBERTa/NepBERTa',model_max_length=512)
+    tokenizer = AutoTokenizer.from_pretrained('NepBERTa/NepBERTa')
     text_model = AutoModel.from_pretrained("NepBERTa/NepBERTa", from_tf=True)
     
     loaded_results = torch.load('/content/drive/MyDrive/Minorproj_Nepali_MultiModal/prefix_and_word.pt',weights_only=True)
     
-    dataset = CaptionEmbeddingDataset(loaded_results,tokenizer) 
-    dataloader = DataLoader(dataset, batch_size=4, shuffle=True, collate_fn=dataset.collate_fn)
+    dataset = CaptionEmbeddingDataset(loaded_results)
+    dataloader = DataLoader(dataset, batch_size=4, shuffle=True, collate_fn=collate_fn)
     
     model = Transformer(tokenizer)
     

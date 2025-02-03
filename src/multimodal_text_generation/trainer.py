@@ -15,15 +15,22 @@ def train_model(model,dataloader,num_epochs,device):
     total_loss=0
 
     for batch_idx,batch in enumerate(dataloader):
-      fused_embs = batch['fused_embeddings'].to(device)
-      shifted_input_ids=batch['shifted_input_ids'].to(device)
-      targets = batch['targets'].to(device)
-      
-      logits=model(fused_embs,shifted_input_ids)
-      
+      captions, embeddings = batch
+      embeddings=embeddings.to(device)
 
-      loss = criterion(logits.view(-1, config.vocab_size), targets.view(-1))
-      
+      tokens=model.tokenizer(captions,return_tensors='pt',padding=True,max_length=128,truncation=True)
+      target_tokens=tokens['input_ids'].to(device)
+
+      outputs=model(embeddings) 
+ 
+      outputs=outputs[:,1:-1,:]
+      targets=target_tokens[:,1:]
+
+
+      outputs = outputs.contiguous().view(-1, config.vocab_size)
+      targets = targets.contiguous().view(-1)
+
+      loss=criterion(outputs,targets)
       optimizer.zero_grad()
       loss.backward()
       optimizer.step()
