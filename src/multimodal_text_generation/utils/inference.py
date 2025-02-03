@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from transformers import AutoTokenizer, AutoModel
 
 def generate_caption(model, tokenizer, fused_embedding, device, max_length=50):
     model.eval()
