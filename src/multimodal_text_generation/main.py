@@ -25,9 +25,9 @@ def main():
     train_model(model, dataloader, num_epochs, device)
     return model
     
-if __name__ == "__main__":
-    model=main()
-    torch.save(model.state_dict(), '/content/drive/MyDrive/Minor_project/autoregressive_model.pt')
+# if __name__ == "__main__":
+#     model=main()
+#     torch.save(model.state_dict(), '/content/drive/MyDrive/Minor_project/autoregressive_model.pt')
 
 def test():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
