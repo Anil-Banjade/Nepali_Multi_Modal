@@ -34,7 +34,7 @@ def test():
     loaded_results = torch.load('/content/drive/MyDrive/Minor_project/prefix_and_word.pt', weights_only=True)
     dataset = CaptionEmbeddingDataset(loaded_results)
     test_caption, test_embedding = dataset[5]
-    fused_embedding = test_embedding[5].clone().detach()
+    fused_embedding = test_embedding[5].clone().detach().to(device)
     
     model_path = '/content/drive/MyDrive/Minor_project/autoregressive_model.pt'
     generated_caption = run_inference(model_path, fused_embedding, device)

@@ -9,7 +9,7 @@ def generate_caption(model, tokenizer, fused_embedding, device, max_length=50):
             fused_embedding = fused_embedding.view(1, 1, -1).to(device)
             print(f"Image embedding shape: {fused_embedding.shape}")
             
-            tokens = tokenizer("[CLS]", return_tensors="pt", padding=True, max_length=128, truncation=True)
+            tokens = tokenizer("[CLS]", return_tensors="pt", padding=True, max_length=128, truncation=True).to(device)
             with torch.no_grad():
                 text_model = AutoModel.from_pretrained("NepBERTa/NepBERTa", from_tf=True).to(device)
                 bos_output = text_model(**tokens)
@@ -91,7 +91,7 @@ def generate_caption(model, tokenizer, fused_embedding, device, max_length=50):
             return None
 
 def load_model(load_path, device):
-    checkpoint = torch.load(load_path, map_location='cpu')
+    checkpoint = torch.load(load_path, map_location='cpu',weights_only=True)
     tokenizer = AutoTokenizer.from_pretrained('NepBERTa/NepBERTa')
     model = Transformer(tokenizer)
     filtered_state_dict = {
