@@ -94,7 +94,7 @@ def load_model(load_path, device):
     tokenizer = AutoTokenizer.from_pretrained('NepBERTa/NepBERTa')
     model = Transformer(tokenizer)
     filtered_state_dict = {
-        k: v for k, v in checkpoint['model_state_dict'].items()
+        k: v for k, v in checkpoint.items()
         if k in model.state_dict()
     }
     model.load_state_dict(filtered_state_dict, strict=False)
