@@ -26,6 +26,7 @@ def train_model(model,dataloader,num_epochs,device):
       target_ids=tokens['input_ids'].to(device)
 
       outputs=model(fused_emb,target_ids[:,:-1]) 
+      outputs = outputs[:, 1:, :]
  
       # outputs=outputs[:,1:-1,:]
       # targets=target_tokens[:,1:] 
