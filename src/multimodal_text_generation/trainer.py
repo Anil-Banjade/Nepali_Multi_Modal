@@ -22,7 +22,8 @@ def train_model(model,dataloader,num_epochs,device):
 
 
       tokens=model.tokenizer(captions,return_tensors='pt',padding=True,max_length=128,truncation=True)
-      target_tokens=tokens['input_ids'].to(device)
+      # target_tokens=tokens['input_ids'].to(device)
+      target_ids=tokens['input_ids'].to(device)
 
       outputs=model(fused_emb,target_ids[:,:-1]) 
  
