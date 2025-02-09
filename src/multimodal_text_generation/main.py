@@ -14,7 +14,7 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained('NepBERTa/NepBERTa')
     text_model = AutoModel.from_pretrained("NepBERTa/NepBERTa", from_tf=True)
     
-    loaded_results = torch.load('/content/drive/MyDrive/Minor_project/prefix_and_word.pt')
+    loaded_results = torch.load('/content/drive/MyDrive/MinorProject_Nepali_MultiModal_LLM/prefix_and_word.pt')
     
     dataset = CaptionEmbeddingDataset(loaded_results,tokenizer)
     dataloader = DataLoader(dataset, batch_size=4, shuffle=True, collate_fn=collate_fn)

@@ -2,9 +2,10 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 
 class CaptionEmbeddingDataset(Dataset): 
-  def __init__(self,loaded_results):
+  def __init__(self,loaded_results,tokenizer):
     self.captions=[item[0] for item in loaded_results]
     self.embeddings=[item[1] for item in loaded_results]
+    self.tokenizer=tokenizer
   def __len__(self):
     return len(self.captions)
   def __getitem__(self,idx):
