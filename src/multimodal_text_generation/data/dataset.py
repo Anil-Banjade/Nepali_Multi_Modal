@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
 
-class CaptionEmbeddingDataset(Dataset):
+class CaptionEmbeddingDataset(Dataset): 
   def __init__(self,loaded_results):
     self.captions=[item[0] for item in loaded_results]
     self.embeddings=[item[1] for item in loaded_results]
@@ -15,7 +15,7 @@ def collate_fn(batch):
   if not all(isinstance(emb, torch.Tensor) for emb in embeddings):
     raise ValueError("All embeddings must be tensors.")
   max_len=max(emb.shape[0] for emb in embeddings)
-  padded_embeddings=[]
+  padded_embeddings=[] 
   for emb in embeddings:
     padding_len=max_len-emb.shape[0]
     padded_emb=torch.nn.functional.pad(emb, (0, 0, 0, padding_len))

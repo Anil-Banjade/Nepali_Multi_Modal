@@ -11,14 +11,14 @@ class Configuration:
     trainable=True
     debug=False
     batch_size=32
-    num_workers=2
+    num_workers=1
     head_lr = 1e-3
     text_encoder_lr=1e-5
     image_encoder_lr=1e-5
     patience=1
     factor=0.8
     epochs=5
-    temperature=1.0
+    temperature=0.9
     weight_decay = 1e-3
     size=224
     num_projection_layers=1

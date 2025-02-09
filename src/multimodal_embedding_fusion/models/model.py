@@ -77,7 +77,7 @@ def calc_similarity_and_labels(image_embeddings,text_embeddings,temperature):
     labels=F.softmax(combined_similarity,dim=-1)
     return logits,labels 
      
-class ContrastiveModel(nn.Module):
+class ContrastiveModel(nn.Module): 
     def __init__( 
         self,
         temperature=Configuration.temperature,

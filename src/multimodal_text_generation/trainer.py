@@ -17,20 +17,24 @@ def train_model(model,dataloader,num_epochs,device):
     for batch_idx,batch in enumerate(dataloader):
       captions, embeddings = batch
       embeddings=embeddings.to(device) 
+      fused_emb = embeddings[:, 0].to(device)  
+      token_embs = embeddings[:, 1:].to(device)
+
 
       tokens=model.tokenizer(captions,return_tensors='pt',padding=True,max_length=128,truncation=True)
       target_tokens=tokens['input_ids'].to(device)
 
-      outputs=model(embeddings) 
+      outputs=model(fused_emb,target_ids[:,:-1]) 
  
-      outputs=outputs[:,1:-1,:]
-      targets=target_tokens[:,1:] 
+      # outputs=outputs[:,1:-1,:]
+      # targets=target_tokens[:,1:] 
 
 
-      outputs = outputs.contiguous().view(-1, config.vocab_size)
-      targets = targets.contiguous().view(-1)
+      # outputs = outputs.contiguous().view(-1, config.vocab_size)
+      # targets = targets.contiguous().view(-1)
 
-      loss=criterion(outputs,targets)
+      # loss=criterion(outputs,targets)
+      loss = criterion(outputs.view(-1, config.vocab_size), target_ids[:, 1:].contiguous().view(-1))
       optimizer.zero_grad()
       loss.backward()
       optimizer.step()

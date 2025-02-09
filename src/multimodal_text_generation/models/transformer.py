@@ -12,16 +12,24 @@ class Transformer(nn.Module):
     def __init__(self,tokenizer): 
         super().__init__()
         self.tokenizer=tokenizer
-        self.pos_emb = PositionalEmbedding() 
+        self.pos_emb = PositionalEmbedding()  
         self.blocks = nn.Sequential(*[TransformerBlock() for _ in range(6)])
-        self.final_ffn = FeedForward()
+        
+        self.fused_proj = nn.Linear(768, config.emb_dim)  
+        self.token_embedding = nn.Embedding(config.vocab_size, config.emb_dim)
+        
         self.gelu=GELU()
         self.output_layer = nn.Linear(config.emb_dim, config.vocab_size)
 
-    def forward(self, combined_embeddings):
+    def forward(self, fused_emb, token_ids=None): 
+        fused_emb = self.fused_proj(fused_emb).unsqueeze(1)
+        if token_ids is not None:
+            token_embs = self.token_embedding(token_ids)  
+            combined_embeddings = torch.cat([fused_emb, token_embs], dim=1)
+        else:
+            combined_embeddings = fused_emb
+        
         x = self.pos_emb(combined_embeddings)
         x = self.blocks(x)
-        x = self.final_ffn(x)
-        x=self.gelu(x)
         logits=self.output_layer(x)
-        return logits 
+        return logits  

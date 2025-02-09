@@ -30,7 +30,7 @@ class MultiModalFusion(nn.Module):
             nn.LayerNorm(fusion_dim),
             nn.ReLU()
         )
-    
+        
     def forward(self,image_features,text_features):
         image_projection=self.image_projection(image_features)
         text_projection=self.text_projection(text_features)
