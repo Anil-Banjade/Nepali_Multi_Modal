@@ -96,6 +96,9 @@ def generate_caption(model, tokenizer, fused_embedding, device, max_length=50):
         fused_embedding = fused_embedding.view(1, -1).to(device)
         generated_ids = [tokenizer.cls_token_id]
         
+        # Get SEP token ID on correct device
+        sep_token_id = torch.tensor(tokenizer.sep_token_id).to(device)
+        
         for _ in range(max_length):
             inputs = torch.tensor([generated_ids]).to(device)
             logits = model(fused_embedding, inputs)[:, -1, :]
@@ -105,11 +108,12 @@ def generate_caption(model, tokenizer, fused_embedding, device, max_length=50):
             top_k = torch.topk(logits, 40)
             probs = torch.softmax(top_k.values, dim=-1)
             next_token = top_k.indices[torch.multinomial(probs, 1)]
-            
-            if next_token == tokenizer.sep_token_id:
+
+            # Compare tensors on same device
+            if torch.equal(next_token, sep_token_id):
                 break
                 
-            generated_ids.append(next_token.item())
+            generated_ids.append(next_token.cpu().item())  # Move to CPU before appending
 
         return tokenizer.decode(generated_ids, skip_special_tokens=True)
         
