@@ -36,7 +36,7 @@ def train_model(model,dataloader,num_epochs,device):
       # targets = targets.contiguous().view(-1)
 
       # loss=criterion(outputs,targets)
-      loss = criterion(outputs.view(-1, config.vocab_size), target_ids[:, 1:].contiguous().view(-1))
+      loss = criterion(outputs.reshape(-1, config.vocab_size), target_ids[:, 1:].contiguous().view(-1))
       optimizer.zero_grad()
       loss.backward()
       optimizer.step()
