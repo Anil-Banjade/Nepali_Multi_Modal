@@ -107,7 +107,8 @@ def generate_caption(model, tokenizer, fused_embedding, device, max_length=50):
             logits = logits / 0.7
             top_k = torch.topk(logits, 40)
             probs = torch.softmax(top_k.values, dim=-1)
-            next_token = top_k.indices[torch.multinomial(probs, 1)]
+            sampled_idx = torch.multinomial(probs, 1)
+            next_token = top_k.indices.gather(1, sampled_idx)
 
             # Compare tensors on same device
             if torch.equal(next_token, sep_token_id):
