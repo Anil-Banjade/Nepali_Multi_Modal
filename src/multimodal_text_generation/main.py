@@ -21,7 +21,7 @@ def main():
     
     model = Transformer(tokenizer)
     
-    num_epochs = 5
+    num_epochs = 5 
     train_model(model, dataloader, num_epochs, device)
     return model
     
