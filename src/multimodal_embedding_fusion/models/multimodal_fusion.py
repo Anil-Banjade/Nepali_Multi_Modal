@@ -26,11 +26,11 @@ class MultiModalFusion(nn.Module):
             dropout=0.1
         )  
         self.final_fusion = nn.Sequential(
-            nn.Linear(512, 768),  
+            nn.Linear(fusion_dim, fusion_dim),  
             nn.ReLU(),
-            nn.LayerNorm(768),
+            nn.LayerNorm(fusion_dim),
             nn.Dropout(0.1),
-            nn.Linear(768, 768)
+            nn.Linear(fusion_dim, fusion_dim)
             
         )      
         
