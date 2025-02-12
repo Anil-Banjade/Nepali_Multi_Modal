@@ -4,7 +4,6 @@ import torch.nn as nn
 from src.multimodal_embedding_fusion.config import Configuration
 from src.multimodal_embedding_fusion.utils import get_transforms
 
-
 class ImageTextDataset(torch.utils.data.Dataset):
     def __init__(self,image_filenames,captions,tokenizer,transforms):
         self.image_filenames=image_filenames
@@ -17,7 +16,7 @@ class ImageTextDataset(torch.utils.data.Dataset):
         )
         self.transforms=transforms
     
-    def __getitem__(self,idx):
+    def __getitem__(self,idx):  
         item={
             key:torch.tensor(values[idx])
             for key,values in self.encoded_captions.items()

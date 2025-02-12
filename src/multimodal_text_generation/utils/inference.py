@@ -57,7 +57,7 @@ def load_model(load_path, device):
 
 def run_inference(model_path, test_image_embedding, device, max_attempts=3):
     try:
-        print("Loading model...")
+        print("Loading model...") 
         model, tokenizer = load_model(model_path, device)
 
         for attempt in range(max_attempts):

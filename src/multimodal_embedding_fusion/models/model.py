@@ -8,7 +8,7 @@ import torch.nn.functional as F
 class TextEncoder(nn.Module):
     def __init__(self,model_name=Configuration.text_encoder,pretrained=Configuration.pretrained,trainable=Configuration.trainable):
         super().__init__()
-        self.model=AutoModel.from_pretrained(model_name,from_tf=True)
+        self.model=AutoModel.from_pretrained(model_name,from_tf=True) 
         for p in self.model.parameters():
             p.requires_grad=trainable
         self.target_token_idx = 0
@@ -66,7 +66,7 @@ def cross_entropy(preds, targets, reduction='none'):
     if reduction == "none":
         return loss
     elif reduction == "mean":
-        return loss.mean()
+        return loss.mean() 
     
     
 def calc_similarity_and_labels(image_embeddings,text_embeddings,temperature):

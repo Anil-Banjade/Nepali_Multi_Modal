@@ -13,7 +13,7 @@ def train_epoch(model,train_loader,optimizer,lr_scheduler,step):
     for batch in progress_bar:
         batch={k:v.to(Configuration.device) for k,v in batch.items() if k!='caption'}
         loss=model(batch)
-        optimizer.zero_grad()
+        optimizer.zero_grad() 
         loss.backward() 
         optimizer.step()
         if step == "batch":

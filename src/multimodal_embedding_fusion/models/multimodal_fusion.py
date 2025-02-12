@@ -9,7 +9,7 @@ from src.multimodal_embedding_fusion.utils import make_train_valid_dfs
 
 
 class MultiModalFusion(nn.Module): 
-    def __init__(
+    def __init__( 
         self,
         image_embedding=Configuration.image_embedding,
         text_embedding=Configuration.text_embedding, 
@@ -22,13 +22,16 @@ class MultiModalFusion(nn.Module):
         
         self.cross_attention=nn.MultiheadAttention(
             embed_dim=fusion_dim,
-            num_heads=8, 
+            num_heads=8,    
             dropout=0.1
-        ) 
+        )  
         self.final_fusion = nn.Sequential(
-            nn.Linear(fusion_dim, fusion_dim),
-            nn.LayerNorm(fusion_dim),
-            nn.ReLU()
+            nn.Linear(1024, 768),  
+            nn.ReLU(),
+            nn.LayerNorm(768),
+            nn.Dropout(0.1),
+            nn.Linear(768, 768)
+            
         )
         
     def forward(self,image_features,text_features):
@@ -46,7 +49,6 @@ class MultiModalFusion(nn.Module):
             value=text_projection
         )
         return self.final_fusion(fused)
-
 
 def train_combined(model_path): 
     train_df, valid_df = make_train_valid_dfs()
@@ -94,7 +96,10 @@ def train_combined(model_path):
             
             fused = fusion_model.final_fusion(fused)
             
-            target = (image_projected + text_projected) / 2
+            # target = (image_projected + text_projected) / 2
+
+            target = torch.cat([image_projected, text_projected], dim=-1) 
+
             loss = criterion(fused, target)
             
             optimizer.zero_grad()

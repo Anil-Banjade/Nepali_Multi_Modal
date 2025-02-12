@@ -42,3 +42,8 @@ def test():
     
     print("Original:", test_caption)
     print("Generated:", generated_caption)
+
+
+
+
+            
