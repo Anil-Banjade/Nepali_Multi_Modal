@@ -131,7 +131,13 @@ def train_combined(model_path):
                 )
                 
                 fused = fusion_model(image_features, text_features)
-                target = (fusion_model.image_projection(image_features) + fusion_model.text_projection(text_features)) / 2
+                # target = (fusion_model.image_projection(image_features) + fusion_model.text_projection(text_features)) / 2
+
+                target = torch.cat([
+                    fusion_model.image_projection(image_features),
+                    fusion_model.text_projection(text_features)
+                ], dim=-1)
+                
                 loss = criterion(fused, target)
                 valid_loss += loss.item()
         
