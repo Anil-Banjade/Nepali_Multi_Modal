@@ -49,7 +49,7 @@ def init_model_and_loaders():
 
 
 def main():
-    df = setup_data()
+    df = setup_data() 
     
     model, train_loader, valid_loader = init_model_and_loaders()
     

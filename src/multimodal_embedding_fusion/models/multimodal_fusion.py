@@ -32,7 +32,7 @@ class MultiModalFusion(nn.Module):
             nn.Dropout(0.1),
             nn.Linear(768, 768)
             
-        )
+        )  
         
     def forward(self,image_features,text_features):
         image_projection=self.image_projection(image_features)
@@ -48,9 +48,9 @@ class MultiModalFusion(nn.Module):
             key=text_projection,
             value=text_projection
         )
-        return self.final_fusion(fused)
+        return self.final_fusion(fused) 
 
-def train_combined(model_path): 
+def train_combined(model_path):    
     train_df, valid_df = make_train_valid_dfs()
     tokenizer = AutoTokenizer.from_pretrained(Configuration.text_tokenizer)
     train_loader = build_loaders(train_df, tokenizer, mode="train")
@@ -66,7 +66,7 @@ def train_combined(model_path):
     
     best_loss = float('inf')
     
-    for epoch in range(Configuration.num_epochs):
+    for epoch in range(Configuration.num_epochs): 
         fusion_model.train()
         train_loss = 0
         
@@ -96,9 +96,8 @@ def train_combined(model_path):
             
             fused = fusion_model.final_fusion(fused)
             
-            # target = (image_projected + text_projected) / 2
+            target = (image_projected + text_projected) / 2
 
-            target = torch.cat([image_projected, text_projected], dim=-1) 
 
             loss = criterion(fused, target)
             
