@@ -18,23 +18,23 @@ class MultiModalFusion(nn.Module):
         super().__init__()
         self.image_projection=ProjectionHead(embedding_dim=image_embedding)
         self.text_projection=ProjectionHead(embedding_dim=text_embedding)
-        self.fusion_dim=fusion_dim  
+        self.fusion_dim=fusion_dim   
         
         self.cross_attention=nn.MultiheadAttention(
             embed_dim=fusion_dim,
             num_heads=8,    
             dropout=0.1
-        )  
+        )     
         self.final_fusion = nn.Sequential(
-            nn.Linear(fusion_dim, fusion_dim),  
+            nn.Linear(fusion_dim, fusion_dim),   
             nn.ReLU(),
             nn.LayerNorm(fusion_dim),
             nn.Dropout(0.1),
-            nn.Linear(fusion_dim, fusion_dim)
-            
-        )      
+            # nn.Linear(fusion_dim, fusion_dim)
+            nn.Linear(fusion_dim, 1024)
+        )        
         
-    def forward(self,image_features,text_features):
+    def forward(self,image_features,text_features): 
         image_projection=self.image_projection(image_features)
         text_projection=self.text_projection(text_features)
 
@@ -43,12 +43,12 @@ class MultiModalFusion(nn.Module):
         if len(text_projection.shape) == 2:
             text_projection = text_projection.unsqueeze(0)
         
-        fused,_=self.cross_attention(
+        fused,_=self.cross_attention( 
             query=image_projection,
             key=text_projection,
             value=text_projection
         )
-        return self.final_fusion(fused) 
+        return self.final_fusion(fused)  
 
 def train_combined(model_path):    
     train_df, valid_df = make_train_valid_dfs()
@@ -62,7 +62,7 @@ def train_combined(model_path):
     
     fusion_model = MultiModalFusion().to(Configuration.device)
     optimizer = torch.optim.AdamW(fusion_model.parameters(), lr=1e-4)
-    criterion = nn.MSELoss()  
+    criterion = nn.MSELoss()   
     
     best_loss = float('inf')
     
@@ -92,11 +92,13 @@ def train_combined(model_path):
                 query=image_projected,
                 key=text_projected,
                 value=text_projected
-            )[0]
+            )[0]   
             
             fused = fusion_model.final_fusion(fused)
             
-            target = (image_projected + text_projected) / 2
+            # target = (image_projected + text_projected) / 2
+
+            target = torch.cat([image_projected, text_projected], dim=-1) 
 
 
             loss = criterion(fused, target)
@@ -136,10 +138,13 @@ def train_combined(model_path):
         avg_valid_loss = valid_loss / len(valid_loader)
         print(f'Epoch {epoch + 1}, Validation Loss: {avg_valid_loss:.4f}')
         
-        if avg_valid_loss < best_loss:
-            best_loss = avg_valid_loss
+        if avg_valid_loss < best_loss: 
+            best_loss = avg_valid_loss 
             torch.save(fusion_model.state_dict(), 'fused_embeddings.pt')
             print(f'Saved best model with Validation Loss: {best_loss:.4f}')
 
     print('Training completed!') 
+    return fusion_model
+    
+    
 
