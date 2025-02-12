@@ -17,8 +17,7 @@ def get_transforms(mode='train'):
     )
     
 def make_train_valid_dfs(): 
-    # dataframe = pd.read_csv("captions.csv")
-    dataframe = pd.read_csv("datasets/captions.csv")
+    dataframe = pd.read_csv("captions.csv") 
     max_id = dataframe["id"].max() + 1 if not Configuration.debug else 100
     image_ids = np.arange(0, max_id) 
     np.random.seed(42)

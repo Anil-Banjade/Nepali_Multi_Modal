@@ -27,8 +27,8 @@ class Configuration:
     dropout=0
     num_epochs=3
 
-    image_path = "data/ficker8k_images/ficker8k_images"
-    captions_path = "data/captions.csv"
+    # image_path = "data/ficker8k_images/ficker8k_images"
+    # captions_path = "data/captions.csv"
     
     
     
