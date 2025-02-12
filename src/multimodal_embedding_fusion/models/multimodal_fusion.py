@@ -26,13 +26,13 @@ class MultiModalFusion(nn.Module):
             dropout=0.1
         )  
         self.final_fusion = nn.Sequential(
-            nn.Linear(1024, 768),  
+            nn.Linear(512, 768),  
             nn.ReLU(),
             nn.LayerNorm(768),
             nn.Dropout(0.1),
             nn.Linear(768, 768)
             
-        )  
+        )      
         
     def forward(self,image_features,text_features):
         image_projection=self.image_projection(image_features)
