@@ -9,13 +9,18 @@ class ImageTextDataset(torch.utils.data.Dataset):
     def __init__(self,image_filenames,captions,tokenizer,transforms):
         self.image_filenames=image_filenames
         self.captions=list(captions)
-        self.encoded_captions=tokenizer(
-            list(captions),
-            padding=True,
-            truncation=True,
-            max_length=Configuration.max_length
-        )
+        self.tokenizer=tokenizer
         self.transforms=transforms
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.encoded_captions=tokenizer(
+            self.captions,
+            padding='max_length',
+            truncation=True,
+            max_length=Configuration.max_length,
+            return_tensors='np'
+        )
+        
+        
     
     def __getitem__(self, idx): 
         # Process image
@@ -42,6 +47,7 @@ class ImageTextDataset(torch.utils.data.Dataset):
 
 def collate_fn(batch):
     images = torch.stack([item['image'] for item in batch])
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     input_ids = torch.stack([item['input_ids'] for item in batch])
     attention_masks = torch.stack([item['attention_mask'] for item in batch])
     captions = [item['caption'] for item in batch]

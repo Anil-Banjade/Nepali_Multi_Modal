@@ -33,9 +33,8 @@ def generate_aligned_embeddings():
     
     with torch.no_grad():
         for batch in tqdm(dataloader, desc="Generating Embeddings"):
-            # Move batch to device
-            batch = {k: v.to(device) for k, v in batch.items() if k != 'caption'}
-            captions = batch['caption']  # Original captions from dataset
+            captions = batch.pop('caption')
+            device_batch = {k: v.to(device) for k, v in batch.items()}
             
             # Get features from contrastive model
             image_features = contrastive_model.image_encoder(batch['image'])
