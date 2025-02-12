@@ -17,7 +17,7 @@ class Configuration:
     image_encoder_lr=1e-5
     patience=1
     factor=0.8
-    epochs=5
+    epochs=3
     temperature=0.9
     weight_decay = 1e-3
     size=224
@@ -25,7 +25,7 @@ class Configuration:
     projection_dim=512 
     fusion_dim=512  
     dropout=0
-    num_epochs=5
+    num_epochs=3
 
     image_path = "data/ficker8k_images/ficker8k_images"
     captions_path = "data/captions.csv"
