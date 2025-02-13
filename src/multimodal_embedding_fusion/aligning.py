@@ -1,78 +1,140 @@
 import torch
 import pandas as pd
 from tqdm import tqdm
+import numpy as np
 from src.multimodal_embedding_fusion.models.model import ContrastiveModel
 from src.multimodal_embedding_fusion.models.multimodal_fusion import MultiModalFusion
 from src.multimodal_embedding_fusion.data.dataset import build_loaders
 from src.multimodal_embedding_fusion.config import Configuration
+from transformers import AutoTokenizer
+import multiprocessing
 
 def generate_aligned_embeddings():
-    # Initialize models
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    
-    # 1. Load Contrastive Model
-    contrastive_model = ContrastiveModel().to(device)
-    contrastive_model.load_state_dict(
-        torch.load('contrastive_model.pt', map_location=device, weights_only=True)
-    )
-    contrastive_model.eval()
-    
-    # 2. Load Fusion Model
-    fusion_model = MultiModalFusion().to(device)
-    fusion_model.load_state_dict(
-        torch.load(model_path, map_location=device, weights_only=True)
-    )
-    fusion_model.eval()
-    
-    # 3. Prepare Data Loader (same as training)
-    df = pd.read_csv(Configuration.captions_path)
+    device = Configuration.device
+
+    BATCH_SIZE = 8 
+
+    torch.cuda.empty_cache()
+    try:
+        contrastive_model = ContrastiveModel().to(device)
+        contrastive_model.load_state_dict(
+            torch.load('/content/drive/MyDrive/Minor_project/contrastive_model.pt',
+                      map_location=device)
+        )
+        contrastive_model.eval()
+
+        fusion_model = MultiModalFusion().to(device)
+        fusion_model.load_state_dict(
+            torch.load('/content/drive/MyDrive/Minor_project/fused_embeddings_model.pt',
+                      map_location=device)
+        )
+        fusion_model.eval()
+    except Exception as e:
+        print(f"Error loading models: {str(e)}")
+        raise
+
+    df = pd.read_csv('captions.csv')
     tokenizer = AutoTokenizer.from_pretrained(Configuration.text_tokenizer)
-    dataloader = build_loaders(df, tokenizer, mode='valid')  # Use same order as CSV
-    
+
+    Configuration.num_workers = 0
+    Configuration.batch_size = BATCH_SIZE
+
+    try:
+        dataloader = build_loaders(df, tokenizer, mode='valid')
+    except Exception as e:
+        print(f"Error building dataloader: {str(e)}")
+        raise
+
     results = []
-    
+    embedding_shapes = set()
+
+
+    total_batches = len(dataloader)
+    print(f"Total batches to process: {total_batches}")
+
     with torch.no_grad():
-        for batch in tqdm(dataloader, desc="Generating Embeddings"):
-            captions = batch.pop('caption')
-            device_batch = {k: v.to(device) for k, v in batch.items()}
+        for batch_idx, batch in enumerate(tqdm(dataloader, desc="Generating Embeddings")):
+            try:
+                captions = batch.pop('caption')
+                device_batch = {k: v.to(device) for k, v in batch.items()}
+
+                image_features = contrastive_model.image_encoder(device_batch['image'])
+                text_features = contrastive_model.text_encoder(
+                    input_ids=device_batch['input_ids'],
+                    attention_mask=device_batch['attention_mask']
+                )
+
+                fused_embeddings = fusion_model(image_features, text_features)
+
+                fused_embeddings = fused_embeddings.squeeze(0)
             
-            # Get features from contrastive model
-            image_features = contrastive_model.image_encoder(batch['image'])
-            text_features = contrastive_model.text_encoder(
-                input_ids=batch['input_ids'],
-                attention_mask=batch['attention_mask']
-            )
-            
-            # Get fused embeddings
-            fused_embeddings = fusion_model(image_features, text_features)
-            
-            # Store with captions
-            for i in range(fused_embeddings.shape[0]):
-                results.append({
-                    'caption': captions[i],
-                    'embedding': fused_embeddings[i].cpu().numpy()
-                })
-    
-    # Convert to DataFrame and verify
+                if batch_idx == 0:
+                    print(f"First batch shapes:")
+                    print(f"Image features: {image_features.shape}")
+                    print(f"Text features: {text_features.shape}")
+                    print(f"Fused embeddings: {fused_embeddings.shape}")
+
+
+
+                for i in range(fused_embeddings.shape[0]):
+                    embedding = fused_embeddings[i].cpu().numpy()
+                    embedding_shapes.add(embedding.shape)
+                    results.append({
+                        'caption': captions[i],
+                        'embedding': embedding
+                    })
+
+            except Exception as e:
+                print(f"Error processing batch {batch_idx}: {str(e)}")
+                continue
+
     result_df = pd.DataFrame(results)
-    print(f"Generated {len(result_df)} embeddings")
-    print("Sample entry:")
-    print(result_df.iloc[0]['caption'])
-    print("Embedding shape:", result_df.iloc[0]['embedding'].shape)
-    
+
+
+
+    print("\nEmbedding shape analysis:")
+    print(f"Number of unique embedding shapes found: {len(embedding_shapes)}")
+    for shape in embedding_shapes:
+        print(f"Shape: {shape}")
+
+
+    first_shape = result_df['embedding'][0].shape
+    invalid_indices = []
+    for idx, emb in enumerate(result_df['embedding']):
+        if emb.shape != first_shape:
+            invalid_indices.append(idx)
+            print(f"Mismatched shape at index {idx}: Expected {first_shape}, got {emb.shape}")
+
+    if invalid_indices:
+        print(f"\nRemoving {len(invalid_indices)} invalid embeddings")
+        result_df = result_df.drop(invalid_indices)
+
+    if len(result_df) > 0:
+        torch.save({
+            'captions': result_df['caption'].values,
+            'embeddings': np.stack(result_df['embedding'].values),
+            'metadata': {
+                'num_samples': len(result_df),
+                'embedding_dim': result_df['embedding'][0].shape[0],
+                'generation_date': pd.Timestamp.now().isoformat()
+            }
+        }, '/content/drive/MyDrive/Minor_project/aligned_caption_embeddings.pt')
+        print(f"\nSuccessfully saved {len(result_df)} embeddings")
+    else:
+        raise ValueError("No valid embeddings to save")
+
+
+    print(f"Number of unique captions: {len(result_df['caption'].unique())}")
+    print(f"Total number of embeddings: {len(result_df)}")
+    print(f"Shape of first embedding: {result_df['embedding'][0].shape}")
+
+    embedding_dims = [emb.shape[0] for emb in result_df['embedding']]
+    assert all(dim == 1024 for dim in embedding_dims), "Not all embeddings are 1024-dimensional"
+
+    if len(result_df['caption'].unique()) != len(result_df):
+        print("Warning: There are duplicate captions!")
+
     return result_df
 
-# Execute and save
 if __name__ == "__main__":
-    embedding_df = generate_aligned_embeddings()
-    
-    # Save with captions
-    torch.save({
-        'captions': embedding_df['caption'].values,
-        'embeddings': np.stack(embedding_df['embedding'].values),
-        'metadata': {
-            'num_samples': len(embedding_df),
-            'embedding_dim': embedding_df['embedding'][0].shape[0],
-            'generation_date': pd.Timestamp.now().isoformat()
-        }
-    }, 'aligned_caption_embeddings.pt')
+  embedding_df = generate_aligned_embeddings()

@@ -15,7 +15,7 @@ class Transformer(nn.Module):
         self.pos_emb = PositionalEmbedding()  
         self.blocks = nn.Sequential(*[TransformerBlock() for _ in range(6)])
         
-        self.fused_proj = nn.Linear(768, config.emb_dim)  
+        self.fused_proj = nn.Linear(1024, config.emb_dim)  
         self.token_embedding = nn.Embedding(config.vocab_size, config.emb_dim)
         
         self.gelu=GELU()

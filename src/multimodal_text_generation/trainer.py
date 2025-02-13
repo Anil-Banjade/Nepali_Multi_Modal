@@ -11,16 +11,13 @@ def train_model(model,dataloader,num_epochs,device):
   criterion=nn.CrossEntropyLoss(ignore_index=0)
 
   for epoch in range(num_epochs):
-    model.train()
-    total_loss=0
+    model.train()  
+    total_loss=0    
 
     for batch_idx,batch in enumerate(dataloader):
       captions, embeddings = batch
-      embeddings=embeddings.to(device) 
-      fused_emb = embeddings[:, 0].to(device)  
-      token_embs = embeddings[:, 1:].to(device)
-
-
+      fused_emb=embeddings.to(device)  
+      
       tokens=model.tokenizer(captions,return_tensors='pt',padding=True,max_length=128,truncation=True)
       target_ids=tokens['input_ids'].to(device)
 
