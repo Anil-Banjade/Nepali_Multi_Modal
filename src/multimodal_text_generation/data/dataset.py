@@ -4,7 +4,7 @@ from torch.utils.data import Dataset, DataLoader
 class CaptionEmbeddingDataset(Dataset): 
   def __init__(self,loaded_results,tokenizer):
     self.captions=loaded_results['captions']
-    self.embeddings=loaded_resuts['embeddings']
+    self.embeddings=loaded_results['embeddings']
     self.tokenizer=tokenizer
   def __len__(self):
     return len(self.captions) 
