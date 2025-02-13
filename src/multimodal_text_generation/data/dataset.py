@@ -9,7 +9,7 @@ class CaptionEmbeddingDataset(Dataset):
   def __len__(self):
     return len(self.captions) 
   def __getitem__(self,idx):
-    return self.captions[idx],self.embeddings[idx]
+    return self.captions[idx],torch.tensor(self.embeddings[idx])
 
 def collate_fn(batch):
   captions,embeddings=zip(*batch) 
