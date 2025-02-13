@@ -73,7 +73,7 @@ def train_combined(model_path):
         for batch in tqdm(train_loader, desc=f'Epoch {epoch + 1}'):
             batch = {k: v.to(Configuration.device) for k, v in batch.items() if k != 'caption'}
             
-            with torch.no_grad():
+            with torch.no_grad(): 
                 image_features = contrastive_model.image_encoder(batch['image'])
                 text_features = contrastive_model.text_encoder(
                     input_ids=batch['input_ids'],

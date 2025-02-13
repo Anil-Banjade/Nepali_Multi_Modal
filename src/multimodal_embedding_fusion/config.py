@@ -11,7 +11,7 @@ class Configuration:
     trainable=True
     debug=False
     batch_size=32
-    num_workers=1
+    num_workers=0
     head_lr = 1e-3
     text_encoder_lr=1e-5
     image_encoder_lr=1e-5
