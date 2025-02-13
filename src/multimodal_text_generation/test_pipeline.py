@@ -15,7 +15,7 @@ from torchvision import transforms
 
 
 def Pipeline_test(input_image=None, input_text=None):
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') 
     tokenizer = AutoTokenizer.from_pretrained('NepBERTa/NepBERTa')
 
     contrastive_model = ContrastiveModel().to(device)
@@ -30,7 +30,7 @@ def Pipeline_test(input_image=None, input_text=None):
     transformer_model.load_state_dict(torch.load('/content/drive/MyDrive/MinorProject_Nepali_MultiModal_LLM/autoregressive_model.pt'))
     transformer_model.eval()
 
-    with torch.no_grad():
+    with torch.no_grad(): 
         if input_image is not None:
             image_features=contrastive_model.image_encoder(input_image)
         if input_text is not None:
@@ -48,23 +48,21 @@ def Pipeline_test(input_image=None, input_text=None):
         else:
             raise ValueError('Must provide at least one input.')
 
-        print(f"Pre-padding shape: {fused_embedding.shape}")  # Debug
+        print(f"Pre-padding shape: {fused_embedding.shape}") 
         
-        # Ensure we have [batch_size, features]
+        
         if len(fused_embedding.shape) == 3:
-            fused_embedding = fused_embedding.squeeze(1)  # Remove sequence dimension
-            
-        # Handle dimension mismatch
-        if fused_embedding.shape[-1] < 768:
-            padding = torch.zeros(
-                fused_embedding.size(0),  # batch size
-                768 - fused_embedding.shape[-1]
-            ).to(device)
-            
-            fused_embedding = torch.cat([
-                fused_embedding,  # [batch, original_dim]
-                padding           # [batch, padding_dim] 
-            ], dim=-1)  # Result: [batch, 768]
+            fused_embedding = fused_embedding.squeeze(1)  
+        
+        if fused_embedding.shape[-1] != 1024:
+            if fused_embedding.shape[-1] < 1024:
+                padding = torch.zeros(
+                    fused_embedding.size(0),
+                    1024 - fused_embedding.shape[-1]
+                ).to(device)
+                fused_embedding = torch.cat([fused_embedding, padding], dim=-1)
+            else:   
+                fused_embedding = fused_embedding[:, :1024]
 
         print(f"Post-padding shape: {fused_embedding.shape}")
 

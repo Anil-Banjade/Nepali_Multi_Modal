@@ -39,4 +39,4 @@ class MultiHeadAttention(nn.Module):
         attn_weights = self.dropout(attn_weights)
 
         context = (attn_weights @ values).transpose(1, 2).contiguous().view(b, num_tokens, self.d_out)
-        return self.out_proj(context) 
+        return self.out_proj(context)   
