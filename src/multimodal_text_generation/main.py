@@ -31,13 +31,13 @@ def main():
 
 def test():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    loaded_results = torch.load('/content/drive/MyDrive/MinorProject_Nepali_MultiModal_LLM/prefix_and_word.pt', weights_only=True)
+    loaded_results = torch.load('/content/drive/MyDrive/Minor_project/aligned_caption_embeddings.pt', weights_only=True)
     tokenizer = AutoTokenizer.from_pretrained('NepBERTa/NepBERTa')
     dataset = CaptionEmbeddingDataset(loaded_results,tokenizer)
     test_caption, test_embedding = dataset[5]
     fused_embedding = test_embedding[5].clone().detach().to(device)
     
-    model_path = '/content/drive/MyDrive/MinorProject_Nepali_MultiModal_LLM/autoregressive_model.pt'
+    model_path = '/content/drive/MyDrive/Minor_project/autoregressive_gen_model.pt'
     generated_caption = run_inference(model_path, fused_embedding, device)
     
     print("Original:", test_caption)
