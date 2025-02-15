@@ -64,10 +64,10 @@ def train_combined(model_path):
     optimizer = torch.optim.AdamW(fusion_model.parameters(), lr=1e-4)
     criterion = nn.MSELoss()   
     
-    best_loss = float('inf')
+    best_loss = float('inf') 
     
     for epoch in range(Configuration.num_epochs): 
-        fusion_model.train()
+        fusion_model.train() 
         train_loss = 0
         
         for batch in tqdm(train_loader, desc=f'Epoch {epoch + 1}'):
@@ -92,7 +92,7 @@ def train_combined(model_path):
                 query=image_projected,
                 key=text_projected,
                 value=text_projected
-            )[0]   
+            )[0]    
             
             fused = fusion_model.final_fusion(fused)
             
@@ -101,7 +101,7 @@ def train_combined(model_path):
             target = torch.cat([image_projected, text_projected], dim=-1) 
 
 
-            loss = criterion(fused, target)
+            loss = criterion(fused, target)  
             
             optimizer.zero_grad()
             loss.backward()
