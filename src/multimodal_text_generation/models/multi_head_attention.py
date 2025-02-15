@@ -4,7 +4,7 @@ import torch.nn as nn
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, d_in, d_out, context_length, dropout, num_heads, qkv_bias=False):
-        super().__init__()
+        super().__init__()  
         self.d_out = d_out
         self.num_heads = num_heads
         self.head_dim = d_out // num_heads
@@ -21,7 +21,7 @@ class MultiHeadAttention(nn.Module):
     def forward(self, x):
         b, num_tokens, _ = x.shape
         device = x.device
-
+ 
         keys = self.W_key(x)
         queries = self.W_query(x)
         values = self.W_value(x)
@@ -39,4 +39,4 @@ class MultiHeadAttention(nn.Module):
         attn_weights = self.dropout(attn_weights)
 
         context = (attn_weights @ values).transpose(1, 2).contiguous().view(b, num_tokens, self.d_out)
-        return self.out_proj(context)   
+        return self.out_proj(context)    

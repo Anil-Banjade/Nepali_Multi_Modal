@@ -4,7 +4,7 @@ from src.multimodal_text_generation.config import config
 
 class PositionalEmbedding(nn.Module):
     def __init__(self):
-        super().__init__()
+        super().__init__() 
         self.emb = nn.Embedding(config.context_length, config.emb_dim)
 
     def forward(self, x):

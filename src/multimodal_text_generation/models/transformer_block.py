@@ -9,7 +9,7 @@ class TransformerBlock(nn.Module):
     def __init__(self):
         super().__init__()
         self.ln1 = LayerNorm(config.emb_dim)
-        self.attention = MultiHeadAttention(
+        self.attention = MultiHeadAttention( 
             d_in=config.emb_dim,
             d_out=config.emb_dim,
             context_length=config.context_length,

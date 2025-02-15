@@ -42,7 +42,7 @@ class ImageTextDataset(torch.utils.data.Dataset):
         }
 
     def __len__(self):
-        return len(self.captions)
+        return len(self.captions)   
 
 
 def collate_fn(batch):
