@@ -12,8 +12,15 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
   optimizer=torch.optim.Adam(model.parameters(),lr=1e-4)
   criterion=nn.CrossEntropyLoss(ignore_index=1)  
 
+  seq_length = config.max_seq_len
+  print(f"Verifying tokenizer settings:")
+  print(f"Pad token: {model.tokenizer.pad_token} (ID: {model.tokenizer.pad_token_id})")
+  print(f"CLS token: {model.tokenizer.cls_token} (ID: {model.tokenizer.cls_token_id})")
+  print(f"SEP token: {model.tokenizer.sep_token} (ID: {model.tokenizer.sep_token_id})")
+
+
   best_val_loss = float('inf')
-  for epoch in range(num_epochs):
+  for epoch in range(num_epochs):  
     model.train()   
     total_loss=0    
 
@@ -23,11 +30,11 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
       
       # tokens=model.tokenizer(captions,return_tensors='pt',padding=True,max_length=128,truncation=True)
 
-      tokens=model.tokenizer(captions,return_tensors='pt',padding='max_length',max_length=128,truncation=True)
+      tokens=model.tokenizer(captions,return_tensors='pt',padding='max_length',max_length=128,truncation=True,add_special_tokens=True)
       target_ids=tokens['input_ids'].to(device) 
 
       outputs=model(fused_emb,target_ids[:,:-1]) 
-      # outputs = outputs[:, 1:, :]
+      # outputs = outputs[:, 1:, :] 
  
       loss = criterion(outputs.reshape(-1, config.vocab_size), target_ids[:, 1:].contiguous().view(-1))
 
