@@ -36,7 +36,7 @@ class Transformer(nn.Module):
         logits=self.output_layer(x) 
         return logits  
 
-    def generate(self, fused_emb, max_length=128, num_beams=5, early_stopping=True):
+    def generate(self, fused_emb, max_length=128, num_beams=1, early_stopping=True):
         batch_size = fused_emb.size(0)
         device = fused_emb.device
         

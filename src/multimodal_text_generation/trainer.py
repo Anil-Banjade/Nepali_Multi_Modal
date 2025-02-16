@@ -88,7 +88,7 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
                 num_beams=1,
                 early_stopping=False
             )
-            
+             # Post-process generated sequences
             generated_ids = generated_ids[:, 1:]  # Remove fused embedding position
             pad_token_id = model.tokenizer.pad_token_id
             current_length = generated_ids.size(1)
@@ -104,7 +104,6 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
                 generated_ids, 
                 skip_special_tokens=True
             )
-
             # Store for metrics
             all_hypotheses.extend(generated_captions)
             all_references.extend([[ref.split()] for ref in val_captions])
