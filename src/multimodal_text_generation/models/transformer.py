@@ -62,7 +62,7 @@ class Transformer(nn.Module):
                 
                 input_ids = torch.cat([
                     input_ids.repeat_interleave(num_beams, dim=0),
-                    indices.view(-1, 1)
+                    indices.reshape(-1, 1)
                 ], dim=1)
                 
                 fused_emb = fused_emb.repeat_interleave(num_beams, dim=0)
