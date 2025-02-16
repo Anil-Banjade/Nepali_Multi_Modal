@@ -40,11 +40,10 @@ class Transformer(nn.Module):
         batch_size = fused_emb.size(0)
         device = fused_emb.device
         
-        
         beam_scores = torch.zeros(batch_size, num_beams, device=device)
         beam_scores[:, 1:] = -1e9  
         beam_scores = beam_scores.view(-1)
-        
+          
         
         input_ids = torch.full((batch_size*num_beams, 1), 
                              self.tokenizer.cls_token_id, 
