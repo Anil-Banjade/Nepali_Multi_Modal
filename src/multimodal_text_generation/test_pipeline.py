@@ -51,7 +51,7 @@ def Pipeline_test(input_image=None, input_text=None):
         print(f"Pre-padding shape: {fused_embedding.shape}") 
         
         
-        if len(fused_embedding.shape) == 3:
+        if len(fused_embedding.shape) == 3: 
             fused_embedding = fused_embedding.squeeze(1)  
         
         if fused_embedding.shape[-1] != 1024:

@@ -1,2 +1,4 @@
 timm
 transformers
+nltk 
+rouge-score

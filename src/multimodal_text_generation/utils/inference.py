@@ -12,16 +12,15 @@ def generate_caption(model, tokenizer, fused_embedding, device, max_length=50):
 
         for _ in range(max_length): 
             inputs = torch.tensor([generated_ids]).to(device)
-            logits = model(fused_embedding, inputs)[:, -1, :]
+            logits = model(fused_embedding, inputs)[:, -1, :] 
             
-            # Enhanced sampling with repetition penalty
-            logits = logits / 0.5  # More focused temperature
+            logits = logits / 0.5  
             sorted_logits, sorted_indices = torch.sort(logits, descending=True)
             
-            # Apply repetition penalty to recent tokens
+            
             for token in generated_ids[-3:]:
                 logits[0, token] *= 0.7
-                
+                 
             top_k = torch.topk(logits, 50)
             probs = torch.softmax(top_k.values, dim=-1)
             sampled_idx = torch.multinomial(probs, 1)
@@ -30,15 +29,14 @@ def generate_caption(model, tokenizer, fused_embedding, device, max_length=50):
             if torch.equal(next_token, sep_token_id) and len(generated_ids) > 5:
                 break
                 
-            # Prevent repeating trigrams
+            
             if len(generated_ids) >= 3 and next_token.item() in generated_ids[-3:]:
                 continue
                 
             generated_ids.append(next_token.cpu().item())
 
-        # Post-processing for better Nepali language structure
         decoded = tokenizer.decode(generated_ids, skip_special_tokens=True)
-        return decoded.capitalize().replace(" ##", "")  # Improve Nepali word joins
+        return decoded.capitalize().replace(" ##", "")  
 
 def load_model(load_path, device):
     checkpoint = torch.load(load_path, map_location='cpu',weights_only=True)

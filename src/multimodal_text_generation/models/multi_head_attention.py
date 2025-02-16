@@ -16,7 +16,7 @@ class MultiHeadAttention(nn.Module):
 
     def get_attention_mask(self, seq_len, device):
         mask = torch.triu(torch.ones(seq_len, seq_len), diagonal=1).bool()
-        return mask.to(device)
+        return mask.to(device) 
 
     def forward(self, x):
         b, num_tokens, _ = x.shape

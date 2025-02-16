@@ -23,7 +23,8 @@ class Transformer(nn.Module):
         self.output_layer = nn.Linear(config.emb_dim, config.vocab_size)
 
     def forward(self, fused_emb, token_ids=None): 
-        fused_emb = self.fused_proj(fused_emb).unsqueeze(1)
+        # fused_emb = self.fused_proj(fused_emb).unsqueeze(1) 
+        fused_emb = self.fused_proj(fused_emb)
         if token_ids is not None:
             token_embs = self.token_embedding(token_ids)  
             combined_embeddings = torch.cat([fused_emb, token_embs], dim=1)
@@ -32,5 +33,5 @@ class Transformer(nn.Module):
         
         x = self.pos_emb(combined_embeddings)
         x = self.blocks(x)
-        logits=self.output_layer(x)
+        logits=self.output_layer(x) 
         return logits  
