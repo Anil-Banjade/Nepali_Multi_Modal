@@ -35,3 +35,43 @@ class Transformer(nn.Module):
         x = self.blocks(x)
         logits=self.output_layer(x) 
         return logits  
+
+    def generate(self, fused_emb, max_length=128, num_beams=5, early_stopping=True):
+        batch_size = fused_emb.size(0)
+        device = fused_emb.device
+        
+        input_ids = torch.full((batch_size, 1), 
+                             self.tokenizer.cls_token_id, 
+                             dtype=torch.long, device=device)
+        
+        for _ in range(max_length - 1):
+            outputs = self(fused_emb, input_ids)
+            next_token_logits = outputs[:, -1, :]
+            
+            if num_beams > 1:
+                next_token_scores = torch.nn.functional.log_softmax(next_token_logits, dim=-1)
+                next_token_scores = next_token_scores.view(batch_size, -1)
+                
+                scores, indices = torch.topk(
+                    next_token_scores, 
+                    num_beams,
+                    dim=1,
+                    largest=True,
+                    sorted=True
+                )
+                
+                input_ids = torch.cat([
+                    input_ids.repeat_interleave(num_beams, dim=0),
+                    indices.view(-1, 1)
+                ], dim=1)
+                
+                fused_emb = fused_emb.repeat_interleave(num_beams, dim=0)
+            else:
+                
+                next_token = torch.argmax(next_token_logits, dim=-1, keepdim=True)
+                input_ids = torch.cat([input_ids, next_token], dim=1)
+
+            if (input_ids[:,-1] == self.tokenizer.sep_token_id).all() and early_stopping:
+                break
+
+        return input_ids
