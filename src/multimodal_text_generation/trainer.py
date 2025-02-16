@@ -10,7 +10,7 @@ from rouge import Rouge
 def train_model(model,dataloader,valid_loader,num_epochs,device):
   model=model.to(device)
   optimizer=torch.optim.Adam(model.parameters(),lr=1e-4)
-  criterion=nn.CrossEntropyLoss(ignore_index=0)
+  criterion=nn.CrossEntropyLoss(ignore_index=1)  
 
   best_val_loss = float('inf')
   for epoch in range(num_epochs):
@@ -52,22 +52,42 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
             val_captions, val_embeddings = val_batch
             val_fused_emb = val_embeddings.to(device)
             
-            generated_ids = model.generate(val_fused_emb, max_length=128, num_beams=1, early_stopping=True)
+            # Generate with padding to ensure fixed length
+            generated_ids = model.generate(
+                val_fused_emb, 
+                max_length=128, 
+                num_beams=1, 
+                early_stopping=False  # Disable early stopping for fixed length
+            )
+            
+            # Pad sequences to match max_length
+            pad_token_id = model.tokenizer.pad_token_id
+            current_length = generated_ids.size(1)
+            pad_token_id = 1
+            if current_length < 128:
+                padding = torch.full((generated_ids.size(0), 128-current_length), 
+                                   pad_token_id, 
+                                   device=device)
+                generated_ids = torch.cat([generated_ids, padding], dim=1)
+
+            # Rest of validation code remains the same
             generated_captions = model.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
             
             tokens = model.tokenizer(val_captions, return_tensors='pt', 
                                     padding=True, max_length=128, truncation=True)
             target_ids = tokens['input_ids'].to(device)
-            actual_captions = model.tokenizer.batch_decode(target_ids, skip_special_tokens=True)
             
+            # Calculate loss with proper masking
+            outputs = model(val_fused_emb, generated_ids[:, :-1])
+            loss = criterion(
+                outputs.reshape(-1, config.vocab_size), 
+                generated_ids[:, 1:].contiguous().view(-1)
+            )
+            val_loss += loss.item()
+
             # Store for metrics
             all_hypotheses.extend(generated_captions)
-            all_references.extend([[ref.split()] for ref in actual_captions])
-            
-            outputs = model(val_fused_emb, generated_ids[:, :-1])
-            loss = criterion(outputs.reshape(-1, config.vocab_size), 
-                            generated_ids[:, 1:].contiguous().view(-1))
-            val_loss += loss.item()
+            all_references.extend([[ref.split()] for ref in val_captions])
 
         bleu_score = corpus_bleu(all_references, [h.split() for h in all_hypotheses])
         rouge = Rouge()
