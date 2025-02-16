@@ -39,7 +39,7 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
       loss = criterion(outputs.reshape(-1, config.vocab_size), target_ids[:, 1:].contiguous().view(-1))
 
 
-      optimizer.zero_grad()
+      optimizer.zero_grad()  
       loss.backward()
       optimizer.step()
 
@@ -63,38 +63,47 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
             val_captions, val_embeddings = val_batch
             val_fused_emb = val_embeddings.to(device)
             
-            # Generate with padding to ensure fixed length
-            generated_ids = model.generate(
-                val_fused_emb, 
-                max_length=128, 
-                num_beams=1, 
-                early_stopping=False  # Disable early stopping for fixed length
-            )
-            
-            # Pad sequences to match max_length
-            pad_token_id = model.tokenizer.pad_token_id
-            current_length = generated_ids.size(1)
-            pad_token_id = 1
-            if current_length < 128:
-                padding = torch.full((generated_ids.size(0), 128-current_length), 
-                                   pad_token_id, 
-                                   device=device)
-                generated_ids = torch.cat([generated_ids, padding], dim=1)
+            val_tokens = model.tokenizer(
+                val_captions,
+                return_tensors='pt',
+                padding='max_length',
+                max_length=config.max_seq_len,
+                truncation=True
+            )      
+            val_target_ids = val_tokens['input_ids'].to(device)
 
-            # Rest of validation code remains the same
-            generated_captions = model.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
-            
-            tokens = model.tokenizer(val_captions, return_tensors='pt', 
-                                    padding=True, max_length=128, truncation=True)
-            target_ids = tokens['input_ids'].to(device)
-            
-            # Calculate loss with proper masking
-            outputs = model(val_fused_emb, generated_ids[:, :-1])
+
+            val_outputs = model(val_fused_emb, val_target_ids[:, :-1])
+            val_outputs = val_outputs[:, 1:, :]  # Match training sequence shift
             loss = criterion(
-                outputs.reshape(-1, config.vocab_size), 
-                generated_ids[:, 1:].contiguous().view(-1)
+                val_outputs.reshape(-1, config.vocab_size),
+                val_target_ids[:, 1:].contiguous().view(-1)
             )
             val_loss += loss.item()
+
+            # Generation for metrics (separate from loss calculation)
+            generated_ids = model.generate(
+                val_fused_emb,
+                max_length=config.max_seq_len,
+                num_beams=1,
+                early_stopping=False
+            )
+            
+            generated_ids = generated_ids[:, 1:]  # Remove fused embedding position
+            pad_token_id = model.tokenizer.pad_token_id
+            current_length = generated_ids.size(1)
+            if current_length < config.max_seq_len:
+                padding = torch.full(
+                    (generated_ids.size(0), config.max_seq_len - current_length),
+                    pad_token_id,
+                    device=device
+                )
+                generated_ids = torch.cat([generated_ids, padding], dim=1)
+
+            generated_captions = model.tokenizer.batch_decode(
+                generated_ids, 
+                skip_special_tokens=True
+            )
 
             # Store for metrics
             all_hypotheses.extend(generated_captions)
