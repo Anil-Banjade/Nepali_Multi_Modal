@@ -33,8 +33,8 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
       tokens=model.tokenizer(captions,return_tensors='pt',padding='max_length',max_length=128,truncation=True,add_special_tokens=True)
       target_ids=tokens['input_ids'].to(device) 
 
-      outputs=model(fused_emb,target_ids[:,:-1]) 
-      # outputs = outputs[:, 1:, :] 
+      outputs=model(fused_emb,target_ids[:,:-1])  
+      outputs = outputs[:, 1:, :] 
  
       loss = criterion(outputs.reshape(-1, config.vocab_size), target_ids[:, 1:].contiguous().view(-1))
 
