@@ -43,7 +43,7 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
 
       optimizer.zero_grad()  
       loss.backward()
-      optimizer.step()
+      optimizer.step() 
 
       total_loss+=loss.item() 
 
@@ -98,14 +98,14 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
                     (generated_ids.size(0), config.max_seq_len - current_length),
                     pad_token_id,
                     device=device
-                )
+                ) 
                 generated_ids = torch.cat([generated_ids, padding], dim=1)
 
             generated_captions = model.tokenizer.batch_decode(
                 generated_ids, 
                 skip_special_tokens=True
             )  
-            # print(f'Generated_captions{generated_captions}')
+            print(f'Generated_captions during validation: {generated_captions}')
             
             all_hypotheses.extend(generated_captions)
             

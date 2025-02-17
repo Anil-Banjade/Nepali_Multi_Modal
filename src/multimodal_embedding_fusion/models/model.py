@@ -44,21 +44,28 @@ class ProjectionHead(nn.Module):
         dropout=Configuration.dropout
     ):
         super().__init__()
-        self.projection=nn.Linear(embedding_dim,projection_dim)
-        self.gelu=nn.GELU() 
-        self.fc=nn.Linear(projection_dim,projection_dim)
-        self.dropout=nn.Dropout(dropout)
-        self.layer_norm=nn.LayerNorm(projection_dim)
+        self.projection = nn.Sequential(
+            nn.Linear(embedding_dim, projection_dim * 2),
+            nn.LayerNorm(projection_dim * 2),
+            nn.LeakyReLU(0.2),
+            nn.Dropout(dropout),
+            nn.Linear(projection_dim * 2, projection_dim),
+            nn.LayerNorm(projection_dim)
+        )
+        self._init_weights()
+        def _init_weights(self):
+        nn.init.kaiming_normal_(
+            self.projection[0].weight,
+            mode='fan_out',
+            nonlinearity='leaky_relu'
+        )
+        nn.init.constant_(self.projection[0].bias, 0)
+        nn.init.xavier_uniform_(self.projection[4].weight)
+        nn.init.constant_(self.projection[4].bias, 0)
+        
         
     def forward(self,x):
-        projected=self.projection(x)
-        x=self.gelu(projected)
-        x=self.fc(x)
-        x=self.dropout(x)
-        x=x+projected
-        x=self.layer_norm(x)
-        return x
-
+        return self.projection(x)
 
 def cross_entropy(preds, targets, reduction='none'):
     log_softmax = nn.LogSoftmax(dim=-1)

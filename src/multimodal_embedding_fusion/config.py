@@ -24,7 +24,7 @@ class Configuration:
     num_projection_layers=1
     projection_dim=512 
     fusion_dim=512  
-    dropout=0
+    dropout=0.3
     num_epochs=3
 
     # image_path = "data/ficker8k_images/ficker8k_images"
