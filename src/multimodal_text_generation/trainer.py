@@ -81,29 +81,29 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
             )
             val_loss += loss.item()
 
-            # Generation for metrics (separate from loss calculation)
-        #     generated_ids = model.generate(
-        #         val_fused_emb,
-        #         max_length=config.max_seq_len,
-        #         num_beams=1,
-        #         early_stopping=False
-        #     )
-        #      # Post-process generated sequences
-        #     generated_ids = generated_ids[:, 1:]  # Remove fused embedding position
-        #     pad_token_id = model.tokenizer.pad_token_id
-        #     current_length = generated_ids.size(1)
-        #     if current_length < config.max_seq_len:
-        #         padding = torch.full(
-        #             (generated_ids.size(0), config.max_seq_len - current_length),
-        #             pad_token_id,
-        #             device=device
-        #         )
-        #         generated_ids = torch.cat([generated_ids, padding], dim=1)
+            Generation for metrics (separate from loss calculation)
+            generated_ids = model.generate(
+                val_fused_emb, 
+                max_length=config.max_seq_len,
+                num_beams=1,
+                early_stopping=False
+            )    
+             # Post-process generated sequences
+            generated_ids = generated_ids[:, 1:]  # Remove fused embedding position
+            pad_token_id = model.tokenizer.pad_token_id
+            current_length = generated_ids.size(1)
+            if current_length < config.max_seq_len:
+                padding = torch.full(
+                    (generated_ids.size(0), config.max_seq_len - current_length),
+                    pad_token_id,
+                    device=device
+                )
+                generated_ids = torch.cat([generated_ids, padding], dim=1)
 
-        #     generated_captions = model.tokenizer.batch_decode(
-        #         generated_ids, 
-        #         skip_special_tokens=True
-        #     )
+            generated_captions = model.tokenizer.batch_decode(
+                generated_ids, 
+                skip_special_tokens=True
+            ) 
         #     # Store for metrics
         #     all_hypotheses.extend(generated_captions)
         #     all_references.extend([[ref.split()] for ref in val_captions])

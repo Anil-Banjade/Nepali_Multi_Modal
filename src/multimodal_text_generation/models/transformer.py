@@ -35,10 +35,10 @@ class Transformer(nn.Module):
         x = self.blocks(x)
         logits=self.output_layer(x) 
         return logits  
-
+ 
     def generate(self, fused_emb, max_length=128, num_beams=1, early_stopping=True):
         batch_size = fused_emb.size(0)
-        device = fused_emb.device
+        device = fused_emb.device  
         
         beam_scores = torch.zeros(batch_size, num_beams, device=device)
         beam_scores[:, 1:] = -1e9  
@@ -76,7 +76,7 @@ class Transformer(nn.Module):
             token_indices = indices % config.vocab_size
             
             
-            input_ids = torch.cat([
+            input_ids = torch.cat([ 
                 input_ids.view(batch_size, num_beams, -1)[
                     torch.arange(batch_size).unsqueeze(-1), 
                     beam_indices
@@ -94,3 +94,5 @@ class Transformer(nn.Module):
         
         input_ids = input_ids.view(batch_size, num_beams, -1)
         return input_ids[:, 0, :]
+
+         
