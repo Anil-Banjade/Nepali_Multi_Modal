@@ -104,13 +104,13 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
                 generated_ids, 
                 skip_special_tokens=True
             ) 
-        #     # Store for metrics
-        #     all_hypotheses.extend(generated_captions)
-        #     all_references.extend([[ref.split()] for ref in val_captions])
+            # Store for metrics
+            all_hypotheses.extend(generated_captions)
+            all_references.extend([[ref.split()] for ref in val_captions])
 
-        # bleu_score = corpus_bleu(all_references, [h.split() for h in all_hypotheses])
-        # rouge = Rouge()
-        # rouge_scores = rouge.get_scores(all_hypotheses, [ref[0] for ref in all_references], avg=True)
+        bleu_score = corpus_bleu(all_references, [h.split() for h in all_hypotheses])
+        rouge = Rouge()
+        rouge_scores = rouge.get_scores(all_hypotheses, [ref[0] for ref in all_references], avg=True)
 
         avg_val_loss = val_loss / len(valid_loader)
         print(f'Val Loss: {avg_val_loss:.4f}') 
