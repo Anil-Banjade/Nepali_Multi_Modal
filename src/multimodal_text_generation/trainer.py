@@ -122,7 +122,7 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
             [ref[0] for ref in all_references],  
             avg=True
         )
-        
+        avg_val_loss = val_loss / len(valid_loader)
         print("\nValidation Metrics:")
         print(f"BLEU-4 Score: {bleu_score:.4f}")
         
@@ -134,7 +134,5 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
         print(f"\nAverage Validation Loss: {avg_val_loss:.4f}")
         print("-" * 60)
         
-
-        avg_val_loss = val_loss / len(valid_loader)
         print(f'Val Loss: {avg_val_loss:.4f}') 
 
