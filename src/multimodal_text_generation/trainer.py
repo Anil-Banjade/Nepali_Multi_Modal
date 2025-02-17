@@ -83,14 +83,13 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
             )
             val_loss += loss.item()
 
-            # Generation for metrics (separate from loss calculation)
+            
             generated_ids = model.generate(
                 val_fused_emb, 
                 max_length=config.max_seq_len,
                 num_beams=1,
                 early_stopping=False
             )    
-             # Post-process generated sequences
             generated_ids = generated_ids[:, 1:]  # Remove fused embedding position
             pad_token_id = model.tokenizer.pad_token_id
             current_length = generated_ids.size(1)
@@ -105,9 +104,11 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
             generated_captions = model.tokenizer.batch_decode(
                 generated_ids, 
                 skip_special_tokens=True
-            ) 
-            # Store for metrics
+            )  
+            # print(f'Generated_captions{generated_captions}')
+            
             all_hypotheses.extend(generated_captions)
+            
             all_references.extend([[ref] for ref in val_captions])
 
         bleu_score = corpus_bleu(
@@ -121,6 +122,17 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
             [ref[0] for ref in all_references],  
             avg=True
         )
+        
+        print("\nValidation Metrics:")
+        print(f"BLEU-4 Score: {bleu_score:.4f}")
+        
+        print("\nROUGE Scores:")
+        for metric in ['rouge-1', 'rouge-2', 'rouge-l']:
+            score = rouge_scores[metric]
+            print(f"{metric.upper():<8} | F1: {score['f']:.4f} | Precision: {score['p']:.4f} | Recall: {score['r']:.4f}")
+
+        print(f"\nAverage Validation Loss: {avg_val_loss:.4f}")
+        print("-" * 60)
         
 
         avg_val_loss = val_loss / len(valid_loader)
