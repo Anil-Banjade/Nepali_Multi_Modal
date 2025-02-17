@@ -6,6 +6,8 @@ from tqdm import tqdm
 
 from nltk.translate.bleu_score import corpus_bleu
 from rouge import Rouge
+from nltk.translate.bleu_score import SmoothingFunction
+
 
 def train_model(model,dataloader,valid_loader,num_epochs,device):
   model=model.to(device)
@@ -106,11 +108,20 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
             ) 
             # Store for metrics
             all_hypotheses.extend(generated_captions)
-            all_references.extend([[ref.split()] for ref in val_captions])
+            all_references.extend([[ref] for ref in val_captions])
 
-        bleu_score = corpus_bleu(all_references, [h.split() for h in all_hypotheses])
+        bleu_score = corpus_bleu(
+            all_references,
+            [h.split() for h in all_hypotheses],
+            smoothing_function=SmoothingFunction().method1
+        )
         rouge = Rouge()
-        rouge_scores = rouge.get_scores(all_hypotheses, [ref[0] for ref in all_references], avg=True)
+        rouge_scores = rouge.get_scores(
+            all_hypotheses,
+            [ref[0] for ref in all_references],  
+            avg=True
+        )
+        
 
         avg_val_loss = val_loss / len(valid_loader)
         print(f'Val Loss: {avg_val_loss:.4f}') 
