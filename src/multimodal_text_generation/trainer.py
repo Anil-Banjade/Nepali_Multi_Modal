@@ -86,7 +86,8 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
                 val_fused_emb, 
                 max_length=config.max_seq_len,
                 num_beams=1,
-                early_stopping=False
+                early_stopping=False,
+                no_repeat_ngram_size=2
             )    
              # Post-process generated sequences
             generated_ids = generated_ids[:, 1:]  # Remove fused embedding position

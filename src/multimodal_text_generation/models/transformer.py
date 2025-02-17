@@ -38,61 +38,24 @@ class Transformer(nn.Module):
  
     def generate(self, fused_emb, max_length=128, num_beams=1, early_stopping=True):
         batch_size = fused_emb.size(0)
-        device = fused_emb.device  
+        device = fused_emb.device
+        # Optimized greedy search for num_beams=1
+        if num_beams == 1:
+            input_ids = torch.full((batch_size, 1), 
+                                 self.tokenizer.cls_token_id, 
+                                 dtype=torch.long, device=device)
+            
+            for step in range(max_length - 1):
+                outputs = self(fused_emb, input_ids)
+                next_tokens = outputs[:, -1, :].argmax(-1, keepdim=True)
+                
+                if (next_tokens == self.tokenizer.sep_token_id).all():
+                    break
+                    
+                input_ids = torch.cat([input_ids, next_tokens], dim=1)
+                
+            return input_ids
         
-        beam_scores = torch.zeros(batch_size, num_beams, device=device)
-        beam_scores[:, 1:] = -1e9  
-        beam_scores = beam_scores.view(-1)
-          
-        
-        input_ids = torch.full((batch_size*num_beams, 1), 
-                             self.tokenizer.cls_token_id, 
-                             dtype=torch.long, device=device)
-        
-        
-        fused_emb = fused_emb.repeat_interleave(num_beams, dim=0)
-
-        for step in range(max_length - 1):
-            outputs = self(fused_emb, input_ids)
-            next_token_logits = outputs[:, -1, :]
-            
-            
-            log_probs = torch.nn.functional.log_softmax(next_token_logits, dim=-1)
-            log_probs = log_probs + beam_scores.unsqueeze(-1)
-            
-            
-            log_probs = log_probs.view(batch_size, -1)
-            
-            scores, indices = torch.topk(
-                log_probs, 
-                num_beams,
-                dim=1,
-                largest=True,
-                sorted=True
-            )
-            
-            
-            beam_indices = indices // config.vocab_size
-            token_indices = indices % config.vocab_size
-            
-            
-            input_ids = torch.cat([ 
-                input_ids.view(batch_size, num_beams, -1)[
-                    torch.arange(batch_size).unsqueeze(-1), 
-                    beam_indices
-                ].view(-1, input_ids.shape[-1]),
-                token_indices.view(-1, 1)
-            ], dim=1)
-            
-            
-            beam_scores = scores.view(-1)
-
-            
-            if early_stopping and (input_ids[:,-1] == self.tokenizer.sep_token_id).all():
-                break
-
-        
-        input_ids = input_ids.view(batch_size, num_beams, -1)
-        return input_ids[:, 0, :]
+       
 
          
