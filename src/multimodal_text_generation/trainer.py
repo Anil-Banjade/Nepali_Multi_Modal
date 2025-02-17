@@ -58,7 +58,7 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
     all_hypotheses = []
     all_references = []
     
-    with torch.no_grad():
+    with torch.no_grad(): 
         for val_batch in valid_loader:
             val_captions, val_embeddings = val_batch
             val_fused_emb = val_embeddings.to(device)
@@ -82,35 +82,35 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
             val_loss += loss.item()
 
             # Generation for metrics (separate from loss calculation)
-            generated_ids = model.generate(
-                val_fused_emb,
-                max_length=config.max_seq_len,
-                num_beams=1,
-                early_stopping=False
-            )
-             # Post-process generated sequences
-            generated_ids = generated_ids[:, 1:]  # Remove fused embedding position
-            pad_token_id = model.tokenizer.pad_token_id
-            current_length = generated_ids.size(1)
-            if current_length < config.max_seq_len:
-                padding = torch.full(
-                    (generated_ids.size(0), config.max_seq_len - current_length),
-                    pad_token_id,
-                    device=device
-                )
-                generated_ids = torch.cat([generated_ids, padding], dim=1)
+        #     generated_ids = model.generate(
+        #         val_fused_emb,
+        #         max_length=config.max_seq_len,
+        #         num_beams=1,
+        #         early_stopping=False
+        #     )
+        #      # Post-process generated sequences
+        #     generated_ids = generated_ids[:, 1:]  # Remove fused embedding position
+        #     pad_token_id = model.tokenizer.pad_token_id
+        #     current_length = generated_ids.size(1)
+        #     if current_length < config.max_seq_len:
+        #         padding = torch.full(
+        #             (generated_ids.size(0), config.max_seq_len - current_length),
+        #             pad_token_id,
+        #             device=device
+        #         )
+        #         generated_ids = torch.cat([generated_ids, padding], dim=1)
 
-            generated_captions = model.tokenizer.batch_decode(
-                generated_ids, 
-                skip_special_tokens=True
-            )
-            # Store for metrics
-            all_hypotheses.extend(generated_captions)
-            all_references.extend([[ref.split()] for ref in val_captions])
+        #     generated_captions = model.tokenizer.batch_decode(
+        #         generated_ids, 
+        #         skip_special_tokens=True
+        #     )
+        #     # Store for metrics
+        #     all_hypotheses.extend(generated_captions)
+        #     all_references.extend([[ref.split()] for ref in val_captions])
 
-        bleu_score = corpus_bleu(all_references, [h.split() for h in all_hypotheses])
-        rouge = Rouge()
-        rouge_scores = rouge.get_scores(all_hypotheses, [ref[0] for ref in all_references], avg=True)
+        # bleu_score = corpus_bleu(all_references, [h.split() for h in all_hypotheses])
+        # rouge = Rouge()
+        # rouge_scores = rouge.get_scores(all_hypotheses, [ref[0] for ref in all_references], avg=True)
 
         avg_val_loss = val_loss / len(valid_loader)
         print(f'Val Loss: {avg_val_loss:.4f}') 
