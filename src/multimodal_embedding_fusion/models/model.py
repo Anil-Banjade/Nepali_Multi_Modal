@@ -53,7 +53,7 @@ class ProjectionHead(nn.Module):
             nn.LayerNorm(projection_dim)
         )
         self._init_weights()
-        def _init_weights(self):
+    def _init_weights(self):
         nn.init.kaiming_normal_(
             self.projection[0].weight,
             mode='fan_out',
