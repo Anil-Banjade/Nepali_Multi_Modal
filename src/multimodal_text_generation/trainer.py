@@ -81,7 +81,7 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
             )
             val_loss += loss.item()
 
-            Generation for metrics (separate from loss calculation)
+            # Generation for metrics (separate from loss calculation)
             generated_ids = model.generate(
                 val_fused_emb, 
                 max_length=config.max_seq_len,
