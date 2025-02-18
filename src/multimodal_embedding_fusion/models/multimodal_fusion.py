@@ -28,13 +28,12 @@ class MultiModalFusion(nn.Module):
         self.final_fusion = nn.Sequential(
             nn.Linear(fusion_dim, fusion_dim*2),  
             nn.LayerNorm(fusion_dim * 2), 
-            nn.LeakyReLU(0.2),
+            nn.LeakyReLU(0.2), 
             nn.Dropout(0.3),
             nn.Linear(fusion_dim*2, fusion_dim*2),
             nn.LayerNorm(fusion_dim*2)
-        )    
+        )       
                
-        
     def forward(self,image_features,text_features):  
         image_projection=self.image_projection(image_features)
         text_projection=self.text_projection(text_features)
@@ -81,8 +80,8 @@ def train_combined(model_path):
                     attention_mask=batch['attention_mask'] 
                 )       
             
-            image_projected = fusion_model.image_projection(image_features)
-            text_projected = fusion_model.text_projection(text_features)
+            image_projected = contrastive_model.image_projection(image_features)
+            text_projected = contrastive_model.text_projection(text_features)
             
             if len(image_projected.shape) == 2:
                 image_projected = image_projected.unsqueeze(0)
