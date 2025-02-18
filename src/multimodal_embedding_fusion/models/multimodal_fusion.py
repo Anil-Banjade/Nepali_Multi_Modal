@@ -30,7 +30,7 @@ class MultiModalFusion(nn.Module):
             nn.LayerNorm(fusion_dim * 2), 
             nn.LeakyReLU(0.2),
             nn.Dropout(0.3),
-            nn.Linear(fusion_dim*2, fusion_dim)
+            nn.Linear(fusion_dim*2, fusion_dim),
             nn.LayerNorm(fusion_dim)
         )    
                
@@ -78,7 +78,7 @@ def train_combined(model_path):
                 image_features = contrastive_model.image_encoder(batch['image'])
                 text_features = contrastive_model.text_encoder(
                     input_ids=batch['input_ids'],
-                    attention_mask=batch['attention_mask']
+                    attention_mask=batch['attention_mask'] 
                 )       
             
             image_projected = fusion_model.image_projection(image_features)
