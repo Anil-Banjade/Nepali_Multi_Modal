@@ -64,7 +64,7 @@ class ProjectionHead(nn.Module):
         nn.init.constant_(self.projection[4].bias, 0)
         
         
-    def forward(self,x):
+    def forward(self,x): 
         return self.projection(x)
 
 def cross_entropy(preds, targets, reduction='none'):

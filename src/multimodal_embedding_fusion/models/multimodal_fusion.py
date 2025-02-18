@@ -15,26 +15,27 @@ class MultiModalFusion(nn.Module):
         text_embedding=Configuration.text_embedding, 
         fusion_dim=Configuration.fusion_dim
     ):
-        super().__init__()
+        super().__init__()    
         self.image_projection=ProjectionHead(embedding_dim=image_embedding)
         self.text_projection=ProjectionHead(embedding_dim=text_embedding)
-        self.fusion_dim=fusion_dim   
+        self.fusion_dim=fusion_dim  
         
         self.cross_attention=nn.MultiheadAttention(
             embed_dim=fusion_dim,
-            num_heads=8,    
+            num_heads=8,     
             dropout=0.1
         )     
         self.final_fusion = nn.Sequential(
-            nn.Linear(fusion_dim, fusion_dim),   
-            nn.ReLU(),
-            nn.LayerNorm(fusion_dim),
-            nn.Dropout(0.1),
-            # nn.Linear(fusion_dim, fusion_dim)
-            nn.Linear(fusion_dim, 1024)
-        )        
+            nn.Linear(fusion_dim, fusion_dim*2),  
+            nn.LayerNorm(fusion_dim * 2), 
+            nn.LeakyReLU(0.2),
+            nn.Dropout(0.3),
+            nn.Linear(fusion_dim*2, fusion_dim)
+            nn.LayerNorm(fusion_dim)
+        )    
+               
         
-    def forward(self,image_features,text_features): 
+    def forward(self,image_features,text_features):  
         image_projection=self.image_projection(image_features)
         text_projection=self.text_projection(text_features)
 
@@ -58,11 +59,11 @@ def train_combined(model_path):
     
     contrastive_model = ContrastiveModel().to(Configuration.device)
     contrastive_model.load_state_dict(torch.load(model_path))
-    contrastive_model.eval() 
+    contrastive_model.eval()   
     
     fusion_model = MultiModalFusion().to(Configuration.device)
     optimizer = torch.optim.AdamW(fusion_model.parameters(), lr=1e-4)
-    criterion = nn.MSELoss()   
+    criterion = nn.MSELoss()    
     
     best_loss = float('inf') 
     
@@ -73,12 +74,12 @@ def train_combined(model_path):
         for batch in tqdm(train_loader, desc=f'Epoch {epoch + 1}'):
             batch = {k: v.to(Configuration.device) for k, v in batch.items() if k != 'caption'}
             
-            with torch.no_grad(): 
+            with torch.no_grad():  
                 image_features = contrastive_model.image_encoder(batch['image'])
                 text_features = contrastive_model.text_encoder(
                     input_ids=batch['input_ids'],
                     attention_mask=batch['attention_mask']
-                )
+                )       
             
             image_projected = fusion_model.image_projection(image_features)
             text_projected = fusion_model.text_projection(text_features)
@@ -88,13 +89,13 @@ def train_combined(model_path):
             if len(text_projected.shape) == 2:
                 text_projected = text_projected.unsqueeze(0)
             
-            fused = fusion_model.cross_attention(
+            fused = fusion_model.cross_attention( 
                 query=image_projected,
                 key=text_projected,
                 value=text_projected
-            )[0]    
+            )[0]      
             
-            fused = fusion_model.final_fusion(fused)
+            fused = fusion_model.final_fusion(fused) 
             
             # target = (image_projected + text_projected) / 2
 
