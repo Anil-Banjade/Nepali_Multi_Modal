@@ -105,7 +105,7 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
                 generated_ids, 
                 skip_special_tokens=True
             )  
-            print(f'Generated_captions during validation: {generated_captions}')
+            # print(f'Generated_captions during validation: {generated_captions}')
             
             all_hypotheses.extend(generated_captions)
             
