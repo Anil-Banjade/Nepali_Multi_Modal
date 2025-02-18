@@ -30,8 +30,8 @@ class MultiModalFusion(nn.Module):
             nn.LayerNorm(fusion_dim * 2), 
             nn.LeakyReLU(0.2),
             nn.Dropout(0.3),
-            nn.Linear(fusion_dim*2, fusion_dim),
-            nn.LayerNorm(fusion_dim)
+            nn.Linear(fusion_dim*2, fusion_dim*2),
+            nn.LayerNorm(fusion_dim*2)
         )    
                
         
@@ -102,7 +102,7 @@ def train_combined(model_path):
             target = torch.cat([image_projected, text_projected], dim=-1) 
 
 
-            loss = criterion(fused, target)  
+            loss = criterion(fused, target)   
             
             optimizer.zero_grad()
             loss.backward()

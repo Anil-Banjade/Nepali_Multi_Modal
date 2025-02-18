@@ -22,7 +22,7 @@ class ImageTextDataset(torch.utils.data.Dataset):
         
         
     
-    def __getitem__(self, idx): 
+    def __getitem__(self, idx):  
         # Process image
         image_path = f"{Configuration.image_path}/{self.image_filenames[idx]}"
         image = cv2.imread(image_path)

@@ -10,7 +10,7 @@ from src.multimodal_embedding_fusion.models.model import ContrastiveModel
 from src.multimodal_embedding_fusion.models.multimodal_fusion import train_combined
 from src.multimodal_embedding_fusion.trainer import train
 
-def setup_data():
+def setup_data():  
     """Setup and preprocess the dataset"""
     df = pd.read_csv(
         "/content/drive/MyDrive/MinorProject_Nepali_MultiModal_LLM/translated_nepali_captions.txt",
