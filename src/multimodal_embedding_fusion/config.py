@@ -25,10 +25,10 @@ class Configuration:
     projection_dim=512 
     fusion_dim=512  
     dropout=0.3
-    num_epochs=10
-
-    # image_path = "data/ficker8k_images/ficker8k_images"
-    # captions_path = "data/captions.csv"
+    num_epochs=5
+ 
+    # image_path = "ficker8k_images/ficker8k_images"
+    # captions_path = "" 
     
     
     
