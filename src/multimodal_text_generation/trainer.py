@@ -80,11 +80,11 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
             loss = criterion(
                 val_outputs.reshape(-1, config.vocab_size),
                 val_target_ids[:, 1:].contiguous().view(-1)
-            )
+            ) 
             val_loss += loss.item()
 
             
-            generated_ids = model.generate(
+            generated_ids = model.generate( val_outputs
                 val_fused_emb, 
                 max_length=config.max_seq_len,
                 num_beams=1,
@@ -101,38 +101,36 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
                 ) 
                 generated_ids = torch.cat([generated_ids, padding], dim=1)
 
-            generated_captions = model.tokenizer.batch_decode(
-                generated_ids, 
-                skip_special_tokens=True
-            )  
+            # generated_captions = model.tokenizer.batch_decode(
+            #     generated_ids, 
+            #     skip_special_tokens=True
+            # )  
             # print(f'Generated_captions during validation: {generated_captions}')
             
-            all_hypotheses.extend(generated_captions)
+            # all_hypotheses.extend(generated_captions)
             
-            all_references.extend([[ref] for ref in val_captions])
+            # all_references.extend([[ref] for ref in val_captions])
 
-        bleu_score = corpus_bleu(
-            all_references,
-            [h.split() for h in all_hypotheses],
-            smoothing_function=SmoothingFunction().method1
-        )
-        rouge = Rouge()
-        rouge_scores = rouge.get_scores(
-            all_hypotheses,
-            [ref[0] for ref in all_references],  
-            avg=True
-        )
+        # bleu_score = corpus_bleu(
+        #     all_references,
+        #     [h.split() for h in all_hypotheses],
+        #     smoothing_function=SmoothingFunction().method1
+        # )
+        # rouge = Rouge()
+        # rouge_scores = rouge.get_scores(
+        #     all_hypotheses,
+        #     [ref[0] for ref in all_references],  
+        #     avg=True
+        # )
         avg_val_loss = val_loss / len(valid_loader)
-        print("\nValidation Metrics:")
-        print(f"BLEU-4 Score: {bleu_score:.4f}")
+        # print("\nValidation Metrics:")
+        # print(f"BLEU-4 Score: {bleu_score:.4f}")
         
-        print("\nROUGE Scores:")
-        for metric in ['rouge-1', 'rouge-2', 'rouge-l']:
-            score = rouge_scores[metric]
-            print(f"{metric.upper():<8} | F1: {score['f']:.4f} | Precision: {score['p']:.4f} | Recall: {score['r']:.4f}")
+        # print("\nROUGE Scores:")
+        # for metric in ['rouge-1', 'rouge-2', 'rouge-l']:
+        #     score = rouge_scores[metric]
+        #     print(f"{metric.upper():<8} | F1: {score['f']:.4f} | Precision: {score['p']:.4f} | Recall: {score['r']:.4f}")
 
         print(f"\nAverage Validation Loss: {avg_val_loss:.4f}")
         print("-" * 60)
-        
-        print(f'Val Loss: {avg_val_loss:.4f}') 
 
