@@ -80,26 +80,26 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
             loss = criterion(
                 val_outputs.reshape(-1, config.vocab_size),
                 val_target_ids[:, 1:].contiguous().view(-1)
-            ) 
+            )
             val_loss += loss.item()
 
             
-            generated_ids = model.generate( val_outputs
-                val_fused_emb, 
-                max_length=config.max_seq_len,
-                num_beams=1,
-                early_stopping=False
-            )    
-            generated_ids = generated_ids[:, 1:]  # Remove fused embedding position
-            pad_token_id = model.tokenizer.pad_token_id
-            current_length = generated_ids.size(1)
-            if current_length < config.max_seq_len:
-                padding = torch.full(
-                    (generated_ids.size(0), config.max_seq_len - current_length),
-                    pad_token_id,
-                    device=device
-                ) 
-                generated_ids = torch.cat([generated_ids, padding], dim=1)
+            # generated_ids = model.generate(
+            #     val_fused_emb, 
+            #     max_length=config.max_seq_len,
+            #     num_beams=1,
+            #     early_stopping=False
+            # )    
+            # generated_ids = generated_ids[:, 1:]  # Remove fused embedding position
+            # pad_token_id = model.tokenizer.pad_token_id
+            # current_length = generated_ids.size(1)
+            # if current_length < config.max_seq_len:
+            #     padding = torch.full(
+            #         (generated_ids.size(0), config.max_seq_len - current_length),
+            #         pad_token_id,
+            #         device=device
+            #     ) 
+            #     generated_ids = torch.cat([generated_ids, padding], dim=1)
 
             # generated_captions = model.tokenizer.batch_decode(
             #     generated_ids, 
@@ -123,7 +123,7 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
         #     avg=True
         # )
         avg_val_loss = val_loss / len(valid_loader)
-        # print("\nValidation Metrics:")
+        print("\nValidation Metrics:")
         # print(f"BLEU-4 Score: {bleu_score:.4f}")
         
         # print("\nROUGE Scores:")
@@ -133,4 +133,6 @@ def train_model(model,dataloader,valid_loader,num_epochs,device):
 
         print(f"\nAverage Validation Loss: {avg_val_loss:.4f}")
         print("-" * 60)
+        
+        
 
